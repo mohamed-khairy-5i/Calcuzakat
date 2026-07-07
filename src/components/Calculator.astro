@@ -1,0 +1,262 @@
+---
+import Icon from "./Icon.astro";
+import { ZAKAT_TABS } from "@data/zakatTypes";
+import { CURRENCIES } from "@lib/zakat";
+
+const currencies = Object.entries(CURRENCIES).map(([code, c]) => ({ code, ...c }));
+
+interface Field {
+  id: string;
+  label: string;
+  placeholder?: string;
+  type?: "number" | "select";
+  options?: { value: string; label: string }[];
+  value?: string;
+}
+const tabFields: Record<string, { fields: Field[]; info: string[] }> = {
+  money: {
+    fields: [
+      { id: "cash", label: "النقود (كاش وبنوك)" },
+      { id: "savings", label: "المدخرات والودائع" },
+      { id: "receivables", label: "الديون المرجوّة لك" },
+      { id: "debts", label: "الديون التي عليك (تُخصم)" },
+    ],
+    info: [
+      "تُحسب على كل مال بلغ النصاب وحال عليه الحول (سنة هجرية).",
+      "النصاب = قيمة 85جم ذهب أو 595جم فضة (نأخذ الأقل).",
+      "النسبة 2.5% من صافي المال بعد خصم الديون.",
+    ],
+  },
+  gold: {
+    fields: [
+      { id: "gold-weight", label: "وزن الذهب (جرام)" },
+      {
+        id: "gold-purity",
+        label: "العيار",
+        type: "select",
+        options: [
+          { value: "24", label: "24 قيراط (خالص)" },
+          { value: "22", label: "22 قيراط" },
+          { value: "21", label: "21 قيراط" },
+          { value: "18", label: "18 قيراط" },
+        ],
+      },
+      { id: "gold-price", label: "سعر جرام الذهب 24 (بعملتك)" },
+    ],
+    info: [
+      "نصاب الذهب 85 جرامًا من الذهب الخالص.",
+      "يُحسب الوزن الصافي حسب العيار قبل تطبيق النسبة.",
+      "ذهب الزينة المعتاد لا زكاة فيه عند الجمهور.",
+    ],
+  },
+  silver: {
+    fields: [
+      { id: "silver-weight", label: "وزن الفضة (جرام)" },
+      { id: "silver-purity", label: "نسبة النقاء %", value: "92.5" },
+      { id: "silver-price", label: "سعر جرام الفضة (بعملتك)" },
+    ],
+    info: [
+      "نصاب الفضة 595 جرامًا من الفضة الخالصة.",
+      "النسبة 2.5% من قيمة الفضة الصافية.",
+    ],
+  },
+  stocks: {
+    fields: [
+      { id: "stocks-value", label: "القيمة السوقية للأسهم" },
+      { id: "dividends", label: "الأرباح النقدية المستلمة" },
+    ],
+    info: [
+      "أسهم المضاربة: زكاة على القيمة السوقية كاملة.",
+      "أسهم الاستثمار طويل الأمد: على نصيب السهم من الموجودات الزكوية.",
+    ],
+  },
+  property: {
+    fields: [
+      { id: "prop-value", label: "قيمة العقارات المُعدّة للبيع" },
+      { id: "prop-rent", label: "صافي الإيجارات المُدّخرة" },
+    ],
+    info: [
+      "العقار للسكن أو الاستعمال الشخصي لا زكاة فيه.",
+      "العقار المُعدّ للبيع تجارةً تجب فيه الزكاة على قيمته.",
+    ],
+  },
+  business: {
+    fields: [
+      { id: "biz-inventory", label: "قيمة البضاعة (عروض التجارة)" },
+      { id: "biz-cash", label: "النقد في الصندوق والبنك" },
+      { id: "biz-receivables", label: "المستحقات المرجوّة" },
+      { id: "biz-payables", label: "الالتزامات والمطلوبات (تُخصم)" },
+    ],
+    info: [
+      "تُقوّم البضاعة بسعر البيع الحالي وقت وجوب الزكاة.",
+      "الزكاة 2.5% على صافي رأس المال العامل.",
+    ],
+  },
+  livestock: {
+    fields: [
+      {
+        id: "live-type",
+        label: "نوع الأنعام",
+        type: "select",
+        options: [
+          { value: "sheep", label: "الأغنام" },
+          { value: "cattle", label: "البقر" },
+          { value: "camel", label: "الإبل" },
+        ],
+      },
+      { id: "live-count", label: "العدد" },
+    ],
+    info: [
+      "زكاة الأنعام تُخرج عيناً (رؤوس) لا نقداً.",
+      "الغنم: شاة في كل 40–120، ثم تتدرج.",
+      "البقر: تبيع في 30، مسنة في 40.",
+      "الإبل: شاة لكل 5 حتى 25 ثم تتدرج.",
+    ],
+  },
+  crops: {
+    fields: [
+      { id: "crop-kg", label: "الكمية (كجم)" },
+      { id: "crop-price", label: "سعر الكيلو (بعملتك)" },
+      {
+        id: "crop-irr",
+        label: "طريقة الري",
+        type: "select",
+        options: [
+          { value: "rain", label: "بعلي / مطري (10%)" },
+          { value: "cost", label: "بكلفة / ري صناعي (5%)" },
+          { value: "mixed", label: "مختلط (7.5%)" },
+        ],
+      },
+    ],
+    info: [
+      "النصاب 653 كجم تقريبًا (خمسة أوسق).",
+      "10% إن سُقيت بلا كلفة، 5% إن سُقيت بكلفة، 7.5% للمختلط.",
+    ],
+  },
+  treasure: {
+    fields: [{ id: "treasure-value", label: "قيمة الركاز/المعدن المكتشف" }],
+    info: [
+      "الركاز: ما وُجد من كنوز الجاهلية أو المعادن.",
+      "الواجب فيه الخُمس (20%) دون اشتراط حول أو نصاب.",
+    ],
+  },
+  fitr: {
+    fields: [{ id: "fitr-persons", label: "عدد الأفراد" }],
+    info: [
+      "تُخرج عن كل فرد صغيرًا أو كبيرًا قبل صلاة العيد.",
+      "المقدار: صاع (~2.5–3 كجم) من غالب قوت البلد.",
+      "يجوز إخراج قيمتها نقدًا عند بعض العلماء.",
+    ],
+  },
+};
+---
+<section id="calculator" class="container scroll-mt-24 py-16 md:py-24">
+  <div class="mx-auto mb-10 max-w-2xl text-center reveal">
+    <span class="eyebrow"><Icon name="calculator" class="h-4 w-4" /> الحاسبة الشرعية الذكية</span>
+    <h2 class="h-section">احسب زكاتك بجميع أنواعها</h2>
+    <p class="h-sub">اختر عملتك ونوع الزكاة، وأدخل بياناتك — تُحسب الزكاة فورًا بدقة شرعية وبأسعار الذهب والفضة المحدّثة.</p>
+  </div>
+
+  <div class="card reveal overflow-hidden">
+    <!-- Currency selector -->
+    <div class="flex flex-wrap items-center justify-center gap-2 border-b border-slate-100 bg-slate-50/70 p-4 dark:border-slate-800 dark:bg-slate-900/60">
+      <span class="ml-1 text-sm font-bold text-slate-500 dark:text-slate-400">العملة:</span>
+      {currencies.map((c, i) => (
+        <button type="button" class:list={["chip", { active: i === 0 }]} data-cur={c.code}>{c.code}</button>
+      ))}
+    </div>
+
+    <div class="grid lg:grid-cols-[280px_1fr]">
+      <!-- Tabs (vertical on desktop, scroll on mobile) -->
+      <nav class="flex gap-2 overflow-x-auto border-b border-slate-100 p-3 lg:flex-col lg:overflow-visible lg:border-b-0 lg:border-l dark:border-slate-800" aria-label="أنواع الزكاة">
+        {ZAKAT_TABS.map((t, i) => (
+          <button
+            type="button"
+            data-tab={t.id}
+            class:list={[
+              "flex shrink-0 items-center gap-3 rounded-xl px-4 py-3 text-right text-sm font-bold transition lg:w-full",
+              i === 0
+                ? "cz-tab-btn bg-brand-600 text-white shadow-glow"
+                : "cz-tab-btn text-slate-600 hover:bg-brand-50 dark:text-slate-300 dark:hover:bg-slate-800",
+            ]}
+          >
+            <span class="grid h-9 w-9 shrink-0 place-items-center rounded-lg bg-white/15"><Icon name={t.icon} class="h-5 w-5" /></span>
+            <span class="hidden sm:block">{t.label}</span>
+          </button>
+        ))}
+      </nav>
+
+      <!-- Panels -->
+      <div class="p-5 md:p-7">
+        {ZAKAT_TABS.map((t, i) => {
+          const cfg = tabFields[t.id]!;
+          return (
+            <div id={`panel-${t.id}`} class:list={["cz-panel", { hidden: i !== 0 }]}>
+              <h3 class="mb-1 flex items-center gap-2 text-xl font-extrabold text-slate-900 dark:text-white">
+                <Icon name={t.icon} class="h-6 w-6 text-brand-600 dark:text-brand-400" /> {t.label}
+              </h3>
+              <p class="mb-5 text-sm text-slate-500 dark:text-slate-400">{t.short}</p>
+
+              <div class="grid gap-4 sm:grid-cols-2">
+                {cfg.fields.map((f) => (
+                  <div>
+                    <label class="field-label" for={`cz-${f.id}`}>{f.label}</label>
+                    {f.type === "select" ? (
+                      <select id={`cz-${f.id}`} class="field" data-calc={t.id}>
+                        {f.options!.map((o) => <option value={o.value}>{o.label}</option>)}
+                      </select>
+                    ) : (
+                      <input
+                        id={`cz-${f.id}`}
+                        type="number"
+                        min="0"
+                        step="any"
+                        inputmode="decimal"
+                        placeholder={f.placeholder ?? "0"}
+                        value={f.value ?? ""}
+                        class="field"
+                        data-calc={t.id}
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+
+              <div class="mt-6 grid gap-4 md:grid-cols-[1fr_auto]">
+                <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 dark:border-slate-700 dark:bg-slate-800/60">
+                  <p class="mb-2 flex items-center gap-1.5 text-sm font-bold text-brand-700 dark:text-brand-300"><Icon name="info" class="h-4 w-4" /> ملاحظات شرعية</p>
+                  <ul class="space-y-1.5 text-sm text-slate-600 dark:text-slate-300">
+                    {cfg.info.map((li) => (
+                      <li class="flex gap-1.5"><Icon name="check" class="mt-0.5 h-4 w-4 shrink-0 text-brand-500" /> {li}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div class="grid min-w-[200px] place-content-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 p-5 text-center text-white shadow-glow">
+                  <div class="text-sm font-semibold opacity-80">الزكاة المستحقة</div>
+                  <div id={`res-${t.id}-disp`} class="mt-1 text-2xl font-extrabold">0.00</div>
+                  <input type="hidden" id={`res-${t.id}`} data-usd="0" />
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+
+    <!-- Grand total -->
+    <div class="border-t border-slate-100 bg-gradient-to-br from-brand-700 to-brand-900 p-7 text-center text-white dark:border-slate-800">
+      <p class="text-sm font-semibold uppercase tracking-wide text-brand-100">إجمالي الزكاة المستحقة على أموالك</p>
+      <div id="grand-total" class="my-2 text-4xl font-extrabold md:text-5xl">0.00</div>
+      <p class="mb-5 text-xs text-brand-100/80">* لا تشمل زكاة الأنعام (تُخرج عيناً) وزكاة الفطر (فريضة مستقلة).</p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <button type="button" id="cz-print" class="btn-gold"><Icon name="print" class="h-5 w-5" /> طباعة التقرير</button>
+        <button type="button" id="cz-reset" class="btn border-2 border-white/40 text-white hover:bg-white hover:text-brand-800"><Icon name="refresh" class="h-5 w-5" /> إعادة تعيين</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { init } from "@lib/calculator-client";
+  init();
+</script>

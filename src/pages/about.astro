@@ -1,0 +1,48 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import { SITE } from "@lib/site";
+import { ABOUT_CARDS } from "@data/content";
+---
+<BaseLayout
+  title={`من نحن | ${SITE.name}`}
+  description="تعرّف على CalcuZakat: مهمتنا في تقديم حاسبة زكاة شرعية دقيقة وشاملة ومجانية لخدمة المسلمين حول العالم."
+  path="/about"
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <h1 class="text-4xl font-extrabold md:text-5xl">من نحن</h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-brand-50/90">
+        {SITE.name} منصة مجانية تهدف إلى تسهيل حساب الزكاة بدقة شرعية على كل مسلم.
+      </p>
+    </div>
+  </section>
+
+  <div class="container mx-auto max-w-3xl py-14">
+    <div class="prose prose-lg prose-slate max-w-none dark:prose-invert">
+      <h2>مهمتنا</h2>
+      <p>
+        نؤمن أن حساب الزكاة عبادة يجب أن تكون سهلة ودقيقة. لذلك بنينا حاسبة تجمع
+        بين الدقة الشرعية والتقنية الحديثة، لتغطّي جميع أنواع الزكاة بأسعار ذهب
+        وفضة محدّثة لحظيًا، مع الحفاظ التام على خصوصيتك.
+      </p>
+      <h2>قيمنا</h2>
+      <ul>
+        <li><strong>الدقة الشرعية:</strong> نعتمد أقوال جمهور العلماء ونوثّق أحكامنا.</li>
+        <li><strong>الخصوصية:</strong> لا نجمع أو نحفظ أي بيانات مالية على أي خادم.</li>
+        <li><strong>المجانية:</strong> كل أدواتنا مجانية بالكامل بلا تسجيل.</li>
+        <li><strong>الشمولية:</strong> نغطّي 10 أنواع من الزكاة بـ 10 عملات.</li>
+      </ul>
+    </div>
+
+    <div class="mt-12 grid gap-5 sm:grid-cols-2">
+      {ABOUT_CARDS.slice(0, 4).map((c) => (
+        <div class="card p-6">
+          <div class="mb-3 grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-300"><Icon name={c.icon} class="h-6 w-6" /></div>
+          <h3 class="mb-2 text-lg font-bold text-slate-900 dark:text-white">{c.title}</h3>
+          <p class="text-sm text-slate-600 dark:text-slate-300">{c.text}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

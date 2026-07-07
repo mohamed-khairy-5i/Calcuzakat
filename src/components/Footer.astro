@@ -1,0 +1,89 @@
+---
+import { SITE, NAV, SOCIAL_SHARE } from "@lib/site";
+import Icon from "./Icon.astro";
+const year = new Date().getFullYear();
+const socials = [
+  { href: SOCIAL_SHARE.whatsapp, icon: "whatsapp", label: "واتساب" },
+  { href: SOCIAL_SHARE.twitter, icon: "twitter", label: "إكس" },
+  { href: SOCIAL_SHARE.facebook, icon: "facebook", label: "فيسبوك" },
+  { href: SOCIAL_SHARE.telegram, icon: "telegram", label: "تليجرام" },
+] as const;
+---
+<footer class="mt-20 bg-brand-950 text-slate-300">
+  <div class="container grid gap-10 py-14 md:grid-cols-4">
+    <div class="md:col-span-2">
+      <div class="flex items-center gap-2.5">
+        <img src={SITE.logo} alt={SITE.name} width="40" height="40" class="h-10 w-10" loading="lazy" />
+        <span class="text-xl font-extrabold text-white">{SITE.name}</span>
+      </div>
+      <p class="mt-4 max-w-md leading-relaxed text-slate-400">
+        حاسبة الزكاة الشرعية الأكثر دقة وشمولاً في العالم العربي. احسب زكاة المال
+        والذهب والفضة والأسهم والعقارات وعروض التجارة والأنعام والزروع وزكاة الفطر —
+        بأسعار محدّثة ومجاناً بالكامل. جميع الحسابات تجري في متصفحك دون حفظ أي بيانات.
+      </p>
+      <div class="mt-6 flex gap-3">
+        {socials.map((s) => (
+          <a
+            href={s.href}
+            target="_blank"
+            rel="noopener"
+            aria-label={`مشاركة عبر ${s.label}`}
+            class="grid h-10 w-10 place-items-center rounded-lg bg-white/10 text-white transition hover:bg-brand-500"
+          >
+            <Icon name={s.icon} class="h-5 w-5" />
+          </a>
+        ))}
+      </div>
+    </div>
+
+    <div>
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-gold-300">روابط سريعة</h3>
+      <ul class="space-y-2.5 text-sm">
+        {NAV.map((n) => (
+          <li><a href={n.href} class="text-slate-400 transition hover:text-white">{n.label}</a></li>
+        ))}
+      </ul>
+    </div>
+
+    <div>
+      <h3 class="mb-4 text-sm font-bold uppercase tracking-wide text-gold-300">قانوني</h3>
+      <ul class="space-y-2.5 text-sm">
+        <li><a href="/about" class="text-slate-400 transition hover:text-white">من نحن</a></li>
+        <li><a href="/privacy" class="text-slate-400 transition hover:text-white">سياسة الخصوصية</a></li>
+        <li><a href={`mailto:${SITE.email}`} class="text-slate-400 transition hover:text-white">تواصل معنا</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="border-t border-white/10">
+    <div class="container flex flex-col items-center justify-between gap-3 py-6 text-sm text-slate-500 md:flex-row">
+      <p>© {year} {SITE.name} — جميع الحقوق محفوظة.</p>
+      <p class="flex items-center gap-1.5">
+        صُنع بإتقان لخدمة المسلمين <Icon name="heart" class="h-4 w-4 text-gold-400" filled />
+      </p>
+    </div>
+  </div>
+</footer>
+
+<button
+  id="to-top"
+  type="button"
+  aria-label="العودة للأعلى"
+  class="fixed bottom-6 left-6 z-40 grid h-12 w-12 translate-y-20 place-items-center rounded-full bg-brand-600 text-white opacity-0 shadow-glow transition-all duration-300 hover:scale-110"
+>
+  <Icon name="arrowUp" class="h-5 w-5" />
+</button>
+
+<script>
+  const btn = document.getElementById("to-top");
+  const toggle = () => {
+    if (!btn) return;
+    const show = window.scrollY > 500;
+    btn.classList.toggle("opacity-0", !show);
+    btn.classList.toggle("translate-y-20", !show);
+    btn.classList.toggle("pointer-events-none", !show);
+  };
+  toggle();
+  window.addEventListener("scroll", toggle, { passive: true });
+  btn?.addEventListener("click", () => window.scrollTo({ top: 0, behavior: "smooth" }));
+</script>

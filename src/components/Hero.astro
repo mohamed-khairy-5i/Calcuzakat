@@ -1,0 +1,73 @@
+---
+import Icon from "./Icon.astro";
+import { SITE } from "@lib/site";
+---
+<section id="home" class="relative overflow-hidden bg-gradient-to-br from-brand-800 via-brand-700 to-brand-900 text-white">
+  <div class="pointer-events-none absolute inset-0 arabesque text-white/[0.06]"></div>
+  <div class="pointer-events-none absolute -right-24 -top-24 h-96 w-96 rounded-full bg-gold-400/20 blur-3xl"></div>
+  <div class="pointer-events-none absolute -left-24 bottom-0 h-96 w-96 rounded-full bg-brand-400/25 blur-3xl"></div>
+
+  <div class="container relative grid items-center gap-12 py-20 md:py-28 lg:grid-cols-2">
+    <div class="reveal">
+      <span class="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur">
+        <Icon name="sparkles" class="h-4 w-4 text-gold-300" /> الأدق والأشمل — بأسعار ذهب وفضة حيّة
+      </span>
+      <h1 class="text-4xl font-extrabold leading-tight md:text-6xl">
+        احسب <span class="grad-text">زكاتك</span> بدقة شرعية
+        <br class="hidden md:block" /> في دقائق معدودة
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-brand-50/90">
+        حاسبة الزكاة الشاملة: المال، الذهب، الفضة، الأسهم، العقارات، عروض التجارة،
+        الأنعام، الزروع وزكاة الفطر — بأسعار محدّثة ونصاب دقيق، مجانًا وبدون تسجيل.
+      </p>
+      <div class="mt-8 flex flex-wrap gap-4">
+        <a href="#calculator" class="btn-gold text-base"><Icon name="calculator" class="h-5 w-5" /> احسب زكاتك الآن</a>
+        <a href="#about" class="btn border-2 border-white/40 text-base text-white hover:bg-white hover:text-brand-800"><Icon name="book" class="h-5 w-5" /> تعلّم عن الزكاة</a>
+      </div>
+      <div class="mt-10 flex flex-wrap items-center gap-6 text-sm text-brand-50/80">
+        <span class="inline-flex items-center gap-2"><Icon name="shield" class="h-5 w-5 text-gold-300" /> خصوصية تامة</span>
+        <span class="inline-flex items-center gap-2"><Icon name="check" class="h-5 w-5 text-gold-300" /> مطابق للأحكام الشرعية</span>
+        <span class="inline-flex items-center gap-2"><Icon name="refresh" class="h-5 w-5 text-gold-300" /> أسعار محدّثة</span>
+      </div>
+    </div>
+
+    <div class="reveal">
+      <div class="relative mx-auto max-w-md">
+        <div class="absolute inset-0 animate-float rounded-4xl bg-gold-400/30 blur-2xl"></div>
+        <img src={SITE.logo} alt={`حاسبة الزكاة ${SITE.name}`} width="420" height="420" class="relative mx-auto w-64 animate-float drop-shadow-2xl md:w-80" loading="eager" fetchpriority="high" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Live nisab -->
+<section class="container relative z-10 -mt-10">
+  <div class="card reveal overflow-hidden">
+    <div class="grid gap-px bg-slate-100 dark:bg-slate-800 md:grid-cols-4">
+      <div class="bg-white p-6 text-center dark:bg-slate-900">
+        <div class="mb-2 flex justify-center text-gold-500"><Icon name="gem" class="h-8 w-8" /></div>
+        <div id="nisab-gold-val" class="text-2xl font-extrabold text-brand-700 dark:text-brand-300">—</div>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">نصاب الذهب (85 جم)</p>
+      </div>
+      <div class="bg-white p-6 text-center dark:bg-slate-900">
+        <div class="mb-2 flex justify-center text-slate-400"><Icon name="coins" class="h-8 w-8" /></div>
+        <div id="nisab-silver-val" class="text-2xl font-extrabold text-brand-700 dark:text-brand-300">—</div>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">نصاب الفضة (595 جم)</p>
+      </div>
+      <div class="bg-white p-6 text-center dark:bg-slate-900">
+        <div class="mb-2 flex justify-center text-gold-500"><Icon name="trending" class="h-8 w-8" /></div>
+        <div id="nisab-goldprice-val" class="text-2xl font-extrabold text-brand-700 dark:text-brand-300">—</div>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">سعر جرام الذهب (24)</p>
+      </div>
+      <div class="bg-white p-6 text-center dark:bg-slate-900">
+        <div class="mb-2 flex justify-center text-slate-400"><Icon name="coin" class="h-8 w-8" /></div>
+        <div id="nisab-silverprice-val" class="text-2xl font-extrabold text-brand-700 dark:text-brand-300">—</div>
+        <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">سعر جرام الفضة</p>
+      </div>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-3 border-t border-slate-100 bg-slate-50 px-6 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/60">
+      <span id="price-status" class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">جارٍ التحديث…</span>
+      <span class="text-slate-500 dark:text-slate-400">آخر تحديث: <span id="last-update" class="font-semibold">اليوم</span></span>
+    </div>
+  </div>
+</section>

@@ -1,0 +1,28 @@
+---
+import { ICON_PATHS, type IconName } from "@lib/icons";
+
+interface Props {
+  name: IconName;
+  class?: string;
+  size?: number;
+  filled?: boolean;
+}
+const { name, class: cls = "w-5 h-5", size, filled = false } = Astro.props;
+const inner = ICON_PATHS[name] ?? "";
+const brandIcons = ["whatsapp", "twitter", "facebook", "telegram"];
+const isBrand = brandIcons.includes(name);
+---
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 24 24"
+  width={size}
+  height={size}
+  fill={isBrand || filled ? "currentColor" : "none"}
+  stroke={isBrand || filled ? "none" : "currentColor"}
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  class={cls}
+  aria-hidden="true"
+  set:html={inner}
+/>

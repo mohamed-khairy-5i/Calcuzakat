@@ -1,0 +1,50 @@
+---
+import { ANALYTICS } from "@lib/site";
+const { ga4Id, adsenseClient, enableAds } = ANALYTICS;
+const hasGa = ga4Id.length > 0;
+const hasAds = enableAds && adsenseClient.length > 0;
+---
+{hasGa && (
+  <>
+    <script
+      type="text/partytown"
+      is:inline
+      src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
+    ></script>
+    <script is:inline define:vars={{ ga4Id }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() { dataLayer.push(arguments); }
+      window.gtag = gtag;
+      gtag("js", new Date());
+      // Consent Mode v2 — default denied until user opts in
+      gtag("consent", "default", {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+        analytics_storage: "granted",
+        wait_for_update: 500,
+      });
+      gtag("config", ga4Id, { anonymize_ip: true });
+      // Helper to fire conversion / custom events site-wide
+      window.czTrack = function (name, params) {
+        try { gtag("event", name, params || {}); } catch (e) {}
+      };
+    </script>
+  </>
+)}
+
+{hasAds && (
+  <script
+    is:inline
+    async
+    src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${adsenseClient}`}
+    crossorigin="anonymous"
+  ></script>
+)}
+
+{!hasGa && (
+  <script is:inline>
+    // Analytics disabled until GA4 ID is configured; provide safe no-op tracker.
+    window.czTrack = window.czTrack || function () {};
+  </script>
+)}

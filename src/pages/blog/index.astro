@@ -1,0 +1,77 @@
+---
+import { getCollection } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import { SITE } from "@lib/site";
+
+const posts = (await getCollection("blog")).sort(
+  (a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  name: `مدونة ${SITE.name}`,
+  url: SITE.domain + "/blog",
+  inLanguage: "ar",
+  blogPost: posts.map((p) => ({
+    "@type": "BlogPosting",
+    headline: p.data.title,
+    description: p.data.description,
+    datePublished: p.data.pubDate.toISOString(),
+    url: `${SITE.domain}/blog/${p.slug}`,
+    image: SITE.domain + p.data.image,
+  })),
+};
+const fmtDate = (d: Date) =>
+  d.toLocaleDateString("ar-EG-u-nu-latn", { year: "numeric", month: "long", day: "numeric" });
+---
+<BaseLayout
+  title="مدونة الزكاة | مقالات شرعية عن حساب الزكاة — CalcuZakat"
+  description="مقالات توعوية موثّقة عن الزكاة: زكاة المال والذهب والفضة، النصاب، زكاة الفطر وأحكامها بأسلوب عملي مبسّط."
+  path="/blog"
+  keywords="مدونة الزكاة, مقالات الزكاة, أحكام الزكاة, زكاة المال, زكاة الفطر, النصاب"
+  jsonLd={jsonLd}
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <span class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur">
+        <Icon name="book" class="h-4 w-4 text-gold-300" /> مدونة CalcuZakat
+      </span>
+      <h1 class="text-4xl font-extrabold md:text-5xl">مقالات <span class="grad-text">الزكاة</span></h1>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-brand-50/90">
+        محتوى شرعي موثّق يشرح أحكام الزكاة وكيفية حسابها بأسلوب عملي مبسّط.
+      </p>
+    </div>
+  </section>
+
+  <div class="container py-14 md:py-20">
+    <div class="grid gap-7 md:grid-cols-2 lg:grid-cols-3">
+      {posts.map((p) => (
+        <article class="card card-hover reveal group overflow-hidden">
+          <a href={`/blog/${p.slug}`} class="block">
+            <div class="aspect-[16/9] overflow-hidden">
+              <img
+                src={p.data.image}
+                alt={p.data.imageAlt}
+                width="600" height="338"
+                loading="lazy"
+                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+              />
+            </div>
+            <div class="p-6">
+              <div class="mb-3 flex items-center gap-3 text-xs text-slate-400">
+                <span class="inline-flex items-center gap-1"><Icon name="clock" class="h-3.5 w-3.5" /> {p.data.readingTime} دقائق</span>
+                <span>•</span>
+                <span>{fmtDate(p.data.pubDate)}</span>
+              </div>
+              <h2 class="mb-2 text-lg font-bold leading-snug text-slate-900 transition group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300">{p.data.title}</h2>
+              <p class="line-clamp-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{p.data.description}</p>
+              <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 dark:text-brand-400">اقرأ المقال <Icon name="arrowLeft" class="h-4 w-4" /></span>
+            </div>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

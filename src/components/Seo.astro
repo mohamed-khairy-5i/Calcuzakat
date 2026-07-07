@@ -1,0 +1,61 @@
+---
+import { SITE } from "@lib/site";
+
+interface Props {
+  title: string;
+  description?: string;
+  path?: string;
+  image?: string;
+  type?: "website" | "article";
+  keywords?: string;
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  noindex?: boolean;
+}
+const {
+  title,
+  description = SITE.description,
+  path = "/",
+  image = SITE.ogImage,
+  type = "website",
+  keywords,
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+
+const canonical = new URL(path, SITE.domain).href;
+const ogImageUrl = new URL(image, SITE.domain).href;
+const graph = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+---
+<title>{title}</title>
+<meta name="description" content={description} />
+{keywords && <meta name="keywords" content={keywords} />}
+<meta name="author" content={SITE.name} />
+<meta
+  name="robots"
+  content={noindex ? "noindex, nofollow" : "index, follow, max-image-preview:large"}
+/>
+<meta name="theme-color" content={SITE.themeColor} />
+<link rel="canonical" href={canonical} />
+<link rel="alternate" hreflang="ar" href={canonical} />
+<link rel="alternate" hreflang="x-default" href={canonical} />
+
+<!-- Open Graph -->
+<meta property="og:type" content={type} />
+<meta property="og:site_name" content={SITE.name} />
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:url" content={canonical} />
+<meta property="og:locale" content={SITE.locale} />
+<meta property="og:image" content={ogImageUrl} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImageUrl} />
+
+{graph.map((node) => (
+  <script type="application/ld+json" set:html={JSON.stringify(node)} />
+))}

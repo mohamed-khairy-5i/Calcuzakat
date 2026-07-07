@@ -1,0 +1,51 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Hero from "@components/Hero.astro";
+import Calculator from "@components/Calculator.astro";
+import HomeSections from "@components/HomeSections.astro";
+import { SITE } from "@lib/site";
+import { FAQS } from "@data/content";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: SITE.name,
+    url: SITE.domain + "/",
+    description: SITE.description,
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "All",
+    inLanguage: "ar",
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: SITE.name,
+    url: SITE.domain + "/",
+    logo: SITE.domain + SITE.logoPng,
+    email: SITE.email,
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: FAQS.map((f) => ({
+      "@type": "Question",
+      name: f.q,
+      acceptedAnswer: { "@type": "Answer", text: f.a },
+    })),
+  },
+];
+---
+<BaseLayout
+  title="حاسبة الزكاة الشرعية | احسب زكاة المال والذهب والفضة بدقة — CalcuZakat"
+  description={SITE.description}
+  path="/"
+  keywords="حاسبة الزكاة, زكاة المال, زكاة الذهب, زكاة الفضة, نصاب الزكاة, حساب الزكاة, زكاة الأسهم, زكاة عروض التجارة, زكاة الأنعام, زكاة الزروع, زكاة الفطر, CalcuZakat"
+  jsonLd={jsonLd}
+>
+  <Hero />
+  <Calculator />
+  <HomeSections />
+</BaseLayout>

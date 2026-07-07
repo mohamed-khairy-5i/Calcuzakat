@@ -1,0 +1,89 @@
+---
+import { SITE, NAV } from "@lib/site";
+import Icon from "./Icon.astro";
+---
+<header id="site-header" class="sticky top-0 z-50 border-b border-transparent transition-all duration-300">
+  <div class="glass">
+    <nav class="container flex h-[var(--nav-h)] items-center justify-between" aria-label="التنقل الرئيسي">
+      <a href="/" class="flex items-center gap-2.5" aria-label={SITE.name}>
+        <img src={SITE.logo} alt={SITE.name} width="40" height="40" class="h-10 w-10" loading="eager" />
+        <span class="text-lg font-extrabold text-brand-800 dark:text-white">{SITE.name}</span>
+      </a>
+
+      <div class="hidden items-center gap-1 lg:flex">
+        {NAV.map((n) => (
+          <a
+            href={n.href}
+            class="rounded-lg px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-brand-50 hover:text-brand-700 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-brand-300"
+          >{n.label}</a>
+        ))}
+      </div>
+
+      <div class="flex items-center gap-2">
+        <a href="/#calculator" class="btn-gold hidden sm:inline-flex">
+          <Icon name="calculator" class="h-4 w-4" /> احسب زكاتك
+        </a>
+        <button
+          id="theme-toggle"
+          type="button"
+          aria-label="تبديل الوضع الليلي"
+          class="grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <Icon name="sun" class="hidden h-5 w-5 dark:block" />
+          <Icon name="moon" class="h-5 w-5 dark:hidden" />
+        </button>
+        <button
+          id="menu-toggle"
+          type="button"
+          aria-label="القائمة"
+          aria-expanded="false"
+          class="grid h-10 w-10 place-items-center rounded-lg text-slate-600 transition hover:bg-slate-100 lg:hidden dark:text-slate-300 dark:hover:bg-slate-800"
+        >
+          <Icon name="menu" class="h-6 w-6" />
+        </button>
+      </div>
+    </nav>
+
+    <div id="mobile-menu" class="hidden border-t border-slate-200 bg-white px-3 py-3 lg:hidden dark:border-slate-800 dark:bg-slate-900">
+      {NAV.map((n) => (
+        <a
+          href={n.href}
+          class="block rounded-lg px-4 py-3 text-base font-semibold text-slate-700 hover:bg-brand-50 dark:text-slate-200 dark:hover:bg-slate-800"
+        >{n.label}</a>
+      ))}
+    </div>
+  </div>
+</header>
+
+<script>
+  const header = document.getElementById("site-header");
+  const menuBtn = document.getElementById("menu-toggle");
+  const menu = document.getElementById("mobile-menu");
+  const themeBtn = document.getElementById("theme-toggle");
+
+  // Sticky shadow on scroll
+  const onScroll = () => {
+    if (!header) return;
+    header.classList.toggle("shadow-soft", window.scrollY > 8);
+    header.classList.toggle("border-slate-200/70", window.scrollY > 8);
+    header.classList.toggle("dark:border-slate-800", window.scrollY > 8);
+  };
+  onScroll();
+  window.addEventListener("scroll", onScroll, { passive: true });
+
+  // Mobile menu
+  menuBtn?.addEventListener("click", () => {
+    const open = menu?.classList.toggle("hidden");
+    menuBtn.setAttribute("aria-expanded", String(open === false));
+  });
+  menu?.querySelectorAll("a").forEach((a) =>
+    a.addEventListener("click", () => menu.classList.add("hidden"))
+  );
+
+  // Theme toggle
+  themeBtn?.addEventListener("click", () => {
+    const root = document.documentElement;
+    const dark = root.classList.toggle("dark");
+    localStorage.setItem("cz-theme", dark ? "dark" : "light");
+  });
+</script>

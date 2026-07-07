@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+.astro/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.local
+.env.production
+
+# Netlify
+.netlify/
+
+# Cache
+.cache/
+*.tmp

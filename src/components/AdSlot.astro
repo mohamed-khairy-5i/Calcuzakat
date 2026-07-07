@@ -1,0 +1,43 @@
+---
+import { ANALYTICS } from "@lib/site";
+
+interface Props {
+  slot?: string;
+  format?: string;
+  label?: string;
+  class?: string;
+}
+const {
+  slot = "",
+  format = "auto",
+  label = "مساحة إعلانية",
+  class: cls = "",
+} = Astro.props;
+const { adsenseClient, enableAds } = ANALYTICS;
+// Render a real manual ad unit ONLY when a valid slot id is supplied.
+// Without a slot id we show the placeholder — Auto Ads (loaded via the
+// AdSense script in <head>) will fill positions automatically, and this
+// avoids AdSense "availableWidth=0 / no slot" console errors.
+const live = enableAds && adsenseClient.length > 0 && slot.length > 0;
+---
+<aside class={`ad-slot my-8 ${cls}`} aria-label={label}>
+  {live ? (
+    <ins
+      class="adsbygoogle block"
+      style="display:block"
+      data-ad-client={adsenseClient}
+      data-ad-slot={slot}
+      data-ad-format={format}
+      data-full-width-responsive="true"
+    ></ins>
+    <script is:inline>
+      (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+  ) : (
+    <div
+      class="mx-auto flex min-h-[90px] max-w-3xl items-center justify-center rounded-2xl border border-dashed border-slate-300 bg-slate-50/60 px-4 text-xs font-semibold uppercase tracking-widest text-slate-400 dark:border-slate-700 dark:bg-slate-900/40"
+    >
+      {label}
+    </div>
+  )}
+</aside>

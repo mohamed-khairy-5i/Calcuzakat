@@ -1,0 +1,56 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import { SITE, ANALYTICS } from "@lib/site";
+---
+<BaseLayout
+  title={`سياسة الخصوصية | ${SITE.name}`}
+  description="سياسة الخصوصية في CalcuZakat: كيف نتعامل مع بياناتك. جميع حسابات الزكاة تجري في متصفحك ولا نحفظ أي بيانات مالية."
+  path="/privacy"
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <h1 class="text-4xl font-extrabold md:text-5xl">سياسة الخصوصية</h1>
+      <p class="mt-4 text-brand-50/90">آخر تحديث: يناير 2025</p>
+    </div>
+  </section>
+
+  <div class="container mx-auto max-w-3xl py-14">
+    <div class="prose prose-lg prose-slate max-w-none dark:prose-invert">
+      <h2>مبدؤنا الأساسي</h2>
+      <p>
+        خصوصيتك أولويتنا القصوى. جميع عمليات حساب الزكاة تجري <strong>داخل متصفحك
+        بالكامل</strong>، ولا يتم إرسال أي بيانات مالية أو شخصية إلى أي خادم خارجي.
+      </p>
+
+      <h2>البيانات المحلية</h2>
+      <p>
+        قد نحفظ إعداداتك (مثل العملة المختارة وآخر أرقام أدخلتها) في
+        <strong>التخزين المحلي (localStorage)</strong> داخل جهازك فقط، لتسهيل
+        استخدامك المتكرر. يمكنك مسح هذه البيانات في أي وقت من زر «إعادة تعيين» أو
+        عبر إعدادات متصفحك.
+      </p>
+
+      <h2>أسعار الذهب والفضة</h2>
+      <p>
+        لجلب أسعار الذهب والفضة المحدّثة، يتصل الموقع بمصدر أسعار خارجي موثوق. هذا
+        الاتصال لا يرسل أي من بياناتك المالية، بل يستقبل الأسعار فقط.
+      </p>
+
+      {ANALYTICS.ga4Id && (
+        <>
+          <h2>التحليلات</h2>
+          <p>
+            نستخدم أدوات تحليل مجهّلة الهوية لفهم كيفية استخدام الموقع وتحسينه، دون
+            تتبّع هويتك الشخصية. يمكنك رفض ملفات التتبّع من إعدادات متصفحك.
+          </p>
+        </>
+      )}
+
+      <h2>التواصل</h2>
+      <p>
+        لأي استفسار حول الخصوصية، تواصل معنا عبر
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+    </div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,142 @@
+---
+import { getCollection, type CollectionEntry } from "astro:content";
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+
+export async function getStaticPaths() {
+  const posts = await getCollection("blog");
+  return posts.map((post) => ({
+    params: { slug: post.slug },
+    props: { post },
+  }));
+}
+
+interface Props {
+  post: CollectionEntry<"blog">;
+}
+const { post } = Astro.props;
+const { Content } = await post.render();
+const d = post.data;
+
+const url = `${SITE.domain}/blog/${post.slug}`;
+const fmtDate = (dt: Date) =>
+  dt.toLocaleDateString("ar-EG-u-nu-latn", { year: "numeric", month: "long", day: "numeric" });
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: d.title,
+    description: d.description,
+    image: SITE.domain + d.image,
+    datePublished: d.pubDate.toISOString(),
+    dateModified: (d.updatedDate ?? d.pubDate).toISOString(),
+    inLanguage: "ar",
+    author: { "@type": "Organization", name: SITE.name },
+    publisher: {
+      "@type": "Organization",
+      name: SITE.name,
+      logo: { "@type": "ImageObject", url: SITE.domain + SITE.logoPng },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE.domain + "/" },
+      { "@type": "ListItem", position: 2, name: "المدونة", item: SITE.domain + "/blog" },
+      { "@type": "ListItem", position: 3, name: d.title, item: url },
+    ],
+  },
+  ...(d.faq.length
+    ? [{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: d.faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }]
+    : []),
+];
+---
+<BaseLayout
+  title={`${d.title} | ${SITE.name}`}
+  description={d.description}
+  path={`/blog/${post.slug}`}
+  image={d.image}
+  type="article"
+  keywords={d.tags.join(", ")}
+  jsonLd={jsonLd}
+>
+  <article>
+    <!-- Hero -->
+    <header class="bg-gradient-to-br from-brand-800 to-brand-900 py-14 text-white md:py-20">
+      <div class="container mx-auto max-w-3xl">
+        <nav class="mb-5 flex items-center gap-2 text-sm text-brand-100/80" aria-label="مسار التنقل">
+          <a href="/" class="hover:text-white">الرئيسية</a>
+          <Icon name="chevron" class="h-4 w-4 -rotate-90" />
+          <a href="/blog" class="hover:text-white">المدونة</a>
+        </nav>
+        <h1 class="text-3xl font-extrabold leading-tight md:text-4xl">{d.title}</h1>
+        <div class="mt-5 flex flex-wrap items-center gap-4 text-sm text-brand-50/85">
+          <span class="inline-flex items-center gap-1.5"><Icon name="clock" class="h-4 w-4" /> {d.readingTime} دقائق للقراءة</span>
+          <span>•</span>
+          <span>{fmtDate(d.pubDate)}</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="container mx-auto max-w-3xl py-12">
+      <img
+        src={d.image}
+        alt={d.imageAlt}
+        width="768" height="432"
+        class="mb-10 aspect-[16/9] w-full rounded-3xl object-cover shadow-soft"
+        loading="eager"
+      />
+
+      <div class="prose prose-lg prose-slate max-w-none prose-headings:font-extrabold prose-headings:text-slate-900 prose-a:text-brand-600 prose-a:no-underline hover:prose-a:underline prose-strong:text-slate-900 prose-blockquote:border-brand-500 prose-blockquote:bg-brand-50/50 prose-blockquote:not-italic prose-blockquote:rounded-l-xl dark:prose-invert dark:prose-headings:text-white dark:prose-strong:text-white dark:prose-blockquote:bg-slate-800/50">
+        <Content />
+      </div>
+
+      {d.faq.length > 0 && (
+        <section class="mt-12">
+          <h2 class="mb-5 text-2xl font-extrabold text-slate-900 dark:text-white">أسئلة شائعة</h2>
+          <div class="space-y-3">
+            {d.faq.map((f) => (
+              <details class="cz-faq card overflow-hidden">
+                <summary class="flex cursor-pointer items-center justify-between gap-3 p-5 font-bold text-slate-800 dark:text-white">
+                  <span>{f.q}</span>
+                  <span class="cz-faq-icon shrink-0 text-brand-600 transition-transform"><Icon name="chevron" class="h-5 w-5" /></span>
+                </summary>
+                <div class="border-t border-slate-100 p-5 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300">{f.a}</div>
+              </details>
+            ))}
+          </div>
+        </section>
+      )}
+
+      <AdSlot label="مساحة إعلانية" />
+
+      <!-- CTA -->
+      <div class="mt-10 rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 p-8 text-center text-white">
+        <h3 class="text-2xl font-extrabold">جاهز لحساب زكاتك؟</h3>
+        <p class="mx-auto mt-2 max-w-md text-brand-50/90">استخدم الحاسبة الشرعية الذكية بأسعار ذهب وفضة محدّثة — مجانًا وبدون تسجيل.</p>
+        <a href="/#calculator" class="btn-gold mt-6"><Icon name="calculator" class="h-5 w-5" /> احسب زكاتك الآن</a>
+      </div>
+    </div>
+  </article>
+
+  <script>
+    document.querySelectorAll<HTMLDetailsElement>(".cz-faq").forEach((el) => {
+      el.addEventListener("toggle", () => {
+        el.querySelector(".cz-faq-icon")?.classList.toggle("rotate-180", el.open);
+      });
+    });
+  </script>
+</BaseLayout>
