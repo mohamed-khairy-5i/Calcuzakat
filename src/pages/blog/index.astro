@@ -2,6 +2,7 @@
 import { getCollection } from "astro:content";
 import BaseLayout from "@layouts/BaseLayout.astro";
 import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
 import { SITE } from "@lib/site";
 
 const posts = (await getCollection("blog")).sort(
@@ -73,5 +74,7 @@ const fmtDate = (d: Date) =>
         </article>
       ))}
     </div>
+
+    <AdSlot label="مساحة إعلانية" class="mx-auto max-w-4xl" />
   </div>
 </BaseLayout>

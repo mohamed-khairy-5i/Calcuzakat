@@ -1,0 +1,163 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+import { ZAKAT_GUIDES } from "@data/zakatGuides";
+
+export async function getStaticPaths() {
+  return ZAKAT_GUIDES.map((g) => ({ params: { type: g.slug }, props: { g } }));
+}
+
+const { g } = Astro.props;
+const url = `${SITE.domain}/zakat/${g.slug}`;
+const others = ZAKAT_GUIDES.filter((x) => x.slug !== g.slug).slice(0, 4);
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: g.title,
+    description: g.metaDesc,
+    inLanguage: "ar",
+    step: g.sections.map((s, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: s.h,
+      text: s.p,
+    })),
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE.domain + "/" },
+      { "@type": "ListItem", position: 2, name: "أنواع الزكاة", item: SITE.domain + "/zakat" },
+      { "@type": "ListItem", position: 3, name: g.title, item: url },
+    ],
+  },
+  ...(g.faq.length
+    ? [{
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: g.faq.map((f) => ({
+          "@type": "Question",
+          name: f.q,
+          acceptedAnswer: { "@type": "Answer", text: f.a },
+        })),
+      }]
+    : []),
+];
+---
+<BaseLayout
+  title={g.metaTitle}
+  description={g.metaDesc}
+  path={`/zakat/${g.slug}`}
+  keywords={g.keywords.join(", ")}
+  jsonLd={jsonLd}
+>
+  <!-- Hero -->
+  <header class="bg-gradient-to-br from-brand-800 to-brand-900 py-14 text-white md:py-20">
+    <div class="container mx-auto max-w-3xl">
+      <nav class="mb-5 flex items-center gap-2 text-sm text-brand-100/80" aria-label="مسار التنقل">
+        <a href="/" class="hover:text-white">الرئيسية</a>
+        <Icon name="chevron" class="h-4 w-4 -rotate-90" />
+        <a href="/zakat" class="hover:text-white">أنواع الزكاة</a>
+      </nav>
+      <div class="mb-4 inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10">
+        <Icon name={g.icon} class="h-7 w-7 text-gold-300" />
+      </div>
+      <h1 class="text-3xl font-extrabold leading-tight md:text-4xl">{g.title}</h1>
+      <p class="mt-4 max-w-2xl leading-relaxed text-brand-50/90">{g.intro}</p>
+      <a href={`/#calculator`} class="btn-gold mt-7" data-cz-jump={g.tab}>
+        <Icon name="calculator" class="h-5 w-5" /> احسب {g.title.includes("زكاة الفطر") ? "زكاة الفطر" : "زكاتك"} الآن
+      </a>
+    </div>
+  </header>
+
+  <div class="container mx-auto max-w-3xl py-12">
+    <!-- Quick facts -->
+    <div class="grid gap-4 sm:grid-cols-2">
+      <div class="card p-6">
+        <div class="mb-2 flex items-center gap-2 text-brand-600"><Icon name="scale" class="h-5 w-5" /><span class="font-bold">النصاب</span></div>
+        <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{g.nisab}</p>
+      </div>
+      <div class="card p-6">
+        <div class="mb-2 flex items-center gap-2 text-brand-600"><Icon name="target" class="h-5 w-5" /><span class="font-bold">المقدار</span></div>
+        <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{g.rate}</p>
+      </div>
+    </div>
+
+    <AdSlot label="مساحة إعلانية" />
+
+    <!-- Sections -->
+    <div class="prose prose-lg prose-slate mt-4 max-w-none prose-headings:font-extrabold prose-headings:text-slate-900 dark:prose-invert dark:prose-headings:text-white">
+      {g.sections.map((s) => (
+        <section>
+          <h2>{s.h}</h2>
+          <p>{s.p}</p>
+        </section>
+      ))}
+    </div>
+
+    <!-- Example -->
+    <div class="mt-8 rounded-2xl border border-brand-100 bg-brand-50/60 p-6 dark:border-brand-900/40 dark:bg-brand-900/20">
+      <h3 class="mb-2 flex items-center gap-2 font-extrabold text-brand-700 dark:text-brand-300"><Icon name="sparkles" class="h-5 w-5" /> {g.example.title}</h3>
+      <p class="leading-relaxed text-slate-700 dark:text-slate-200">{g.example.body}</p>
+    </div>
+
+    <!-- FAQ -->
+    {g.faq.length > 0 && (
+      <section class="mt-12">
+        <h2 class="mb-5 text-2xl font-extrabold text-slate-900 dark:text-white">أسئلة شائعة</h2>
+        <div class="space-y-3">
+          {g.faq.map((f) => (
+            <details class="cz-faq card overflow-hidden">
+              <summary class="flex cursor-pointer items-center justify-between gap-3 p-5 font-bold text-slate-800 dark:text-white">
+                <span>{f.q}</span>
+                <span class="cz-faq-icon shrink-0 text-brand-600 transition-transform"><Icon name="chevron" class="h-5 w-5" /></span>
+              </summary>
+              <div class="border-t border-slate-100 p-5 text-sm leading-relaxed text-slate-600 dark:border-slate-800 dark:text-slate-300">{f.a}</div>
+            </details>
+          ))}
+        </div>
+      </section>
+    )}
+
+    <AdSlot label="مساحة إعلانية" />
+
+    <!-- CTA -->
+    <div class="mt-10 rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 p-8 text-center text-white">
+      <h3 class="text-2xl font-extrabold">احسب زكاتك بدقة الآن</h3>
+      <p class="mx-auto mt-2 max-w-md text-brand-50/90">حاسبة شرعية ذكية بأسعار ذهب وفضة محدّثة لحظيًا — مجانًا وبدون تسجيل.</p>
+      <a href="/#calculator" class="btn-gold mt-6" data-cz-jump={g.tab}><Icon name="calculator" class="h-5 w-5" /> افتح الحاسبة</a>
+    </div>
+
+    <!-- Related guides (internal links) -->
+    <section class="mt-12">
+      <h2 class="mb-5 text-xl font-extrabold text-slate-900 dark:text-white">أنواع زكاة أخرى</h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {others.map((o) => (
+          <a href={`/zakat/${o.slug}`} class="card flex items-center gap-3 p-4 transition hover:shadow-glow">
+            <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-600 dark:bg-brand-900/30"><Icon name={o.icon} class="h-5 w-5" /></span>
+            <span class="font-bold text-slate-800 dark:text-white">{o.title.split(":")[0]}</span>
+          </a>
+        ))}
+      </div>
+    </section>
+  </div>
+
+  <script>
+    document.querySelectorAll<HTMLDetailsElement>(".cz-faq").forEach((el) => {
+      el.addEventListener("toggle", () => {
+        el.querySelector(".cz-faq-icon")?.classList.toggle("rotate-180", el.open);
+      });
+    });
+    // Remember which calculator tab to open after jumping home.
+    document.querySelectorAll<HTMLAnchorElement>("[data-cz-jump]").forEach((a) => {
+      a.addEventListener("click", () => {
+        try { sessionStorage.setItem("cz-open-tab", a.dataset.czJump || ""); } catch {}
+      });
+    });
+  </script>
+</BaseLayout>

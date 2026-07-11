@@ -241,6 +241,25 @@ function reset(): void {
   recalc();
 }
 
+function shareResult(): void {
+  const total = $("grand-total")?.textContent?.trim() || "0.00";
+  const cur = sym(THEME.currency);
+  const text = `حسبت زكاتي بدقة عبر CalcuZakat: ${total} ${cur} 🌙\nاحسب زكاتك مجانًا:`;
+  const url = "https://calcuzakat.netlify.app";
+  window.czTrack?.("share_result", { currency: THEME.currency });
+
+  // Native share sheet on mobile if available.
+  if (navigator.share) {
+    navigator
+      .share({ title: "CalcuZakat", text, url })
+      .catch(() => {});
+    return;
+  }
+  // Fallback: open WhatsApp share in a new tab.
+  const wa = `https://wa.me/?text=${encodeURIComponent(text + " " + url)}`;
+  window.open(wa, "_blank", "noopener");
+}
+
 export function init(): void {
   if (!$("calculator")) return;
   load();
@@ -270,11 +289,25 @@ export function init(): void {
     });
 
   $("cz-print")?.addEventListener("click", printReport);
+  $("cz-share")?.addEventListener("click", shareResult);
   $("cz-reset")?.addEventListener("click", reset);
 
   setDefaultPrices();
   updateNisabCards();
   recalc();
+
+  // Open a specific tab when arriving from a zakat guide page.
+  try {
+    const wanted = sessionStorage.getItem("cz-open-tab");
+    if (wanted) {
+      sessionStorage.removeItem("cz-open-tab");
+      showTab(wanted);
+      setTimeout(
+        () => $("calculator")?.scrollIntoView({ behavior: "smooth", block: "start" }),
+        120
+      );
+    }
+  } catch {}
 
   // Live prices (async, non-blocking)
   fetchLivePrices().then((p) => {

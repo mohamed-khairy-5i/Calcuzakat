@@ -32,7 +32,7 @@ export const ANALYTICS = {
 
 export const NAV = [
   { href: "/#calculator", label: "الحاسبة" },
-  { href: "/#tools", label: "الأدوات" },
+  { href: "/zakat", label: "أنواع الزكاة" },
   { href: "/#about", label: "عن الزكاة" },
   { href: "/blog", label: "المدونة" },
   { href: "/#faq", label: "الأسئلة" },

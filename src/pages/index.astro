@@ -6,7 +6,37 @@ import HomeSections from "@components/HomeSections.astro";
 import { SITE } from "@lib/site";
 import { FAQS } from "@data/content";
 
+// أقسام الموقع الرئيسية — تُستخدم لسكيمة SiteNavigationElement
+// حتى تظهر روابط الأقسام أسفل نتيجة الموقع في جوجل (Sitelinks)
+const SITE_SECTIONS = [
+  { name: "حاسبة الزكاة", url: SITE.domain + "/#calculator" },
+  { name: "أنواع الزكاة", url: SITE.domain + "/zakat" },
+  { name: "زكاة المال", url: SITE.domain + "/zakat/money" },
+  { name: "زكاة الذهب", url: SITE.domain + "/zakat/gold" },
+  { name: "زكاة الفضة", url: SITE.domain + "/zakat/silver" },
+  { name: "زكاة الأسهم", url: SITE.domain + "/zakat/stocks" },
+  { name: "زكاة عروض التجارة", url: SITE.domain + "/zakat/business" },
+  { name: "زكاة الفطر", url: SITE.domain + "/zakat/fitr" },
+  { name: "المدونة", url: SITE.domain + "/blog" },
+];
+
 const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: SITE.name,
+    alternateName: SITE.titleAr,
+    url: SITE.domain + "/",
+    inLanguage: "ar",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: SITE.domain + "/blog?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  },
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -19,6 +49,14 @@ const jsonLd = [
     isAccessibleForFree: true,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
   },
+  // SiteNavigationElement — يجعل جوجل يعرض روابط الأقسام (Sitelinks) أسفل الموقع
+  ...SITE_SECTIONS.map((s, i) => ({
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    position: i + 1,
+    name: s.name,
+    url: s.url,
+  })),
   {
     "@context": "https://schema.org",
     "@type": "Organization",

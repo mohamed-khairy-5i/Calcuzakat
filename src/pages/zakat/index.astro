@@ -1,0 +1,60 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+import { ZAKAT_GUIDES } from "@data/zakatGuides";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: "أنواع الزكاة",
+  itemListElement: ZAKAT_GUIDES.map((g, i) => ({
+    "@type": "ListItem",
+    position: i + 1,
+    name: g.title.split(":")[0],
+    url: `${SITE.domain}/zakat/${g.slug}`,
+  })),
+};
+---
+<BaseLayout
+  title="أنواع الزكاة وحاسباتها | CalcuZakat"
+  description="أدلة شرعية مبسّطة لكل أنواع الزكاة: المال، الذهب، الفضة، الأسهم، عروض التجارة وزكاة الفطر — مع نصابها ومقدارها وحاسبة مجانية دقيقة."
+  path="/zakat"
+  keywords="أنواع الزكاة, زكاة المال, زكاة الذهب, زكاة الفضة, زكاة الأسهم, زكاة الفطر, حاسبة الزكاة"
+  jsonLd={jsonLd}
+>
+  <header class="bg-gradient-to-br from-brand-800 to-brand-900 py-14 text-white md:py-20">
+    <div class="container mx-auto max-w-4xl text-center">
+      <h1 class="text-3xl font-extrabold md:text-4xl">أنواع الزكاة وحاسباتها</h1>
+      <p class="mx-auto mt-4 max-w-2xl leading-relaxed text-brand-50/90">
+        دليل شرعي مبسّط لكل نوع من أنواع الزكاة، يوضّح النصاب والمقدار وطريقة الحساب بأمثلة عملية — مع حاسبة دقيقة مجانية.
+      </p>
+    </div>
+  </header>
+
+  <div class="container mx-auto max-w-5xl py-12">
+    <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+      {ZAKAT_GUIDES.map((g) => (
+        <a href={`/zakat/${g.slug}`} class="card group flex flex-col gap-3 p-6 transition hover:-translate-y-1 hover:shadow-glow">
+          <span class="flex h-12 w-12 items-center justify-center rounded-2xl bg-brand-50 text-brand-600 transition group-hover:bg-brand-600 group-hover:text-white dark:bg-brand-900/30">
+            <Icon name={g.icon} class="h-6 w-6" />
+          </span>
+          <h2 class="text-lg font-extrabold text-slate-900 dark:text-white">{g.title.split(":")[0]}</h2>
+          <p class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{g.metaDesc}</p>
+          <span class="mt-auto inline-flex items-center gap-1 pt-2 text-sm font-bold text-brand-600">
+            اقرأ الدليل <Icon name="chevron" class="h-4 w-4 rotate-90" />
+          </span>
+        </a>
+      ))}
+    </div>
+
+    <AdSlot label="مساحة إعلانية" />
+
+    <div class="mt-8 rounded-3xl bg-gradient-to-br from-brand-700 to-brand-900 p-8 text-center text-white">
+      <h3 class="text-2xl font-extrabold">ابدأ الحساب فورًا</h3>
+      <p class="mx-auto mt-2 max-w-md text-brand-50/90">10 أنواع زكاة، 10 عملات، وأسعار محدّثة لحظيًا.</p>
+      <a href="/#calculator" class="btn-gold mt-6"><Icon name="calculator" class="h-5 w-5" /> افتح الحاسبة</a>
+    </div>
+  </div>
+</BaseLayout>

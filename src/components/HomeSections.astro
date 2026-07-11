@@ -2,11 +2,37 @@
 import Icon from "./Icon.astro";
 import AdSlot from "./AdSlot.astro";
 import { ZAKAT_TABS } from "@data/zakatTypes";
+import { ZAKAT_GUIDES } from "@data/zakatGuides";
 import {
   STATS, ABOUT_CARDS, FEATURES, TIPS, COMPARE_ROWS,
   COMPETITOR_STRENGTHS, COMPETITOR_GAPS, FAQS,
 } from "@data/content";
 import { SITE, SOCIAL_SHARE } from "@lib/site";
+
+// slugs that have a dedicated guide page, for internal linking.
+const guideSlugs = new Set(ZAKAT_GUIDES.map((g) => g.slug));
+
+// أقسام الموقع الرئيسية — تُعرض بشكل بارز في الصفحة الرئيسية
+// (تدعم ظهور الأقسام تحت بعضها في نتائج جوجل — Sitelinks)
+const SITE_LINKS = [
+  { href: "/#calculator", label: "الحاسبة", desc: "احسب زكاتك فوراً", icon: "calculator" as const },
+  { href: "/zakat", label: "أنواع الزكاة", desc: "أدلة مفصّلة لكل نوع", icon: "layers" as const },
+  { href: "/zakat/money", label: "زكاة المال", desc: "نصاب المال ومقداره", icon: "wallet" as const },
+  { href: "/zakat/gold", label: "زكاة الذهب", desc: "نصاب 85 جرام", icon: "gem" as const },
+  { href: "/zakat/silver", label: "زكاة الفضة", desc: "نصاب 595 جرام", icon: "coins" as const },
+  { href: "/zakat/stocks", label: "زكاة الأسهم", desc: "للمستثمر والمضارب", icon: "chart" as const },
+  { href: "/zakat/business", label: "عروض التجارة", desc: "زكاة رأس المال التجاري", icon: "briefcase" as const },
+  { href: "/zakat/fitr", label: "زكاة الفطر", desc: "مقدارها ووقتها", icon: "gift" as const },
+  { href: "/blog", label: "المدونة", desc: "مقالات فقهية موثّقة", icon: "book" as const },
+];
+
+// حقائق سريعة مهمة تُعرض في الصفحة الرئيسية
+const KEY_FACTS = [
+  { icon: "scale" as const, value: "2.5%", label: "مقدار زكاة المال والذهب والفضة" },
+  { icon: "gem" as const, value: "85 جم", label: "نصاب الذهب الخالص (عيار 24)" },
+  { icon: "coins" as const, value: "595 جم", label: "نصاب الفضة" },
+  { icon: "clock" as const, value: "عام هجري", label: "حولان الحول شرط لوجوب الزكاة" },
+];
 ---
 <!-- STATS -->
 <section class="container py-14">
@@ -21,6 +47,46 @@ import { SITE, SOCIAL_SHARE } from "@lib/site";
   </div>
 </section>
 
+<!-- KEY FACTS — بيانات مهمة سريعة -->
+<section class="container pb-4">
+  <div class="card reveal overflow-hidden">
+    <div class="grid gap-px bg-slate-100 dark:bg-slate-800 sm:grid-cols-2 lg:grid-cols-4">
+      {KEY_FACTS.map((f) => (
+        <div class="flex items-center gap-4 bg-white p-5 dark:bg-slate-900">
+          <div class="grid h-12 w-12 shrink-0 place-items-center rounded-xl bg-gold-50 text-gold-600 dark:bg-slate-800 dark:text-gold-400"><Icon name={f.icon} class="h-6 w-6" /></div>
+          <div>
+            <div class="text-xl font-extrabold text-brand-700 dark:text-brand-300">{f.value}</div>
+            <p class="text-xs leading-snug text-slate-500 dark:text-slate-400">{f.label}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- SITE SECTIONS — أقسام الموقع (تظهر تحت بعضها في الفهرسة) -->
+<nav id="sections" aria-label="أقسام الموقع" class="container scroll-mt-24 py-10">
+  <div class="mx-auto mb-8 max-w-2xl text-center reveal">
+    <span class="eyebrow"><Icon name="globe" class="h-4 w-4" /> تصفّح الموقع</span>
+    <h2 class="h-section">أقسام الموقع الرئيسية</h2>
+    <p class="h-sub">انتقل مباشرةً إلى أي قسم من أقسام حاسبة الزكاة وأدلتها الشرعية.</p>
+  </div>
+  <ul class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+    {SITE_LINKS.map((l) => (
+      <li>
+        <a href={l.href} class="card card-hover reveal flex items-center gap-4 p-4 transition">
+          <div class="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-50 text-brand-600 dark:bg-slate-800 dark:text-brand-300"><Icon name={l.icon} class="h-5 w-5" /></div>
+          <div class="min-w-0 flex-1">
+            <h3 class="truncate font-bold text-slate-900 dark:text-white">{l.label}</h3>
+            <p class="truncate text-xs text-slate-500 dark:text-slate-400">{l.desc}</p>
+          </div>
+          <Icon name="chevron" class="h-4 w-4 shrink-0 rotate-90 text-slate-300" />
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>
+
 <AdSlot label="مساحة إعلانية — أعلى الأدوات" />
 
 <!-- TOOLS -->
@@ -33,11 +99,19 @@ import { SITE, SOCIAL_SHARE } from "@lib/site";
     </div>
     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
       {ZAKAT_TABS.map((t) => (
-        <a href="#calculator" class="card card-hover reveal group p-6" data-jump={t.id}>
-          <div class="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow transition-transform group-hover:scale-110"><Icon name={t.icon} class="h-7 w-7" /></div>
-          <h3 class="mb-1.5 text-lg font-bold text-slate-900 dark:text-white">{t.label}</h3>
-          <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">{t.short}</p>
-        </a>
+        <div class="card card-hover reveal group flex flex-col p-6">
+          <a href="#calculator" class="block" data-jump={t.id}>
+            <div class="mb-4 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-brand-500 to-brand-700 text-white shadow-glow transition-transform group-hover:scale-110"><Icon name={t.icon} class="h-7 w-7" /></div>
+            <h3 class="mb-1.5 text-lg font-bold text-slate-900 dark:text-white">{t.label}</h3>
+            <p class="text-sm leading-relaxed text-slate-500 dark:text-slate-400">{t.short}</p>
+          </a>
+          <div class="mt-4 flex items-center gap-4 border-t border-slate-100 pt-4 text-sm font-bold dark:border-slate-800">
+            <a href="#calculator" data-jump={t.id} class="inline-flex items-center gap-1 text-brand-600 dark:text-brand-400"><Icon name="calculator" class="h-4 w-4" /> احسب</a>
+            {guideSlugs.has(t.id) && (
+              <a href={`/zakat/${t.id}`} class="inline-flex items-center gap-1 text-slate-500 hover:text-brand-600 dark:text-slate-400">دليل مفصّل <Icon name="chevron" class="h-4 w-4 rotate-90" /></a>
+            )}
+          </div>
+        </div>
       ))}
     </div>
   </div>

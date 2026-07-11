@@ -20,6 +20,22 @@ const { post } = Astro.props;
 const { Content } = await post.render();
 const d = post.data;
 
+// Related posts: prefer shared tags, fall back to most recent others.
+const allPosts = await getCollection("blog");
+const related = allPosts
+  .filter((p) => p.slug !== post.slug)
+  .map((p) => ({
+    p,
+    score: p.data.tags.filter((t) => d.tags.includes(t)).length,
+  }))
+  .sort(
+    (a, b) =>
+      b.score - a.score ||
+      b.p.data.pubDate.getTime() - a.p.data.pubDate.getTime()
+  )
+  .slice(0, 3)
+  .map((x) => x.p);
+
 const url = `${SITE.domain}/blog/${post.slug}`;
 const fmtDate = (dt: Date) =>
   dt.toLocaleDateString("ar-EG-u-nu-latn", { year: "numeric", month: "long", day: "numeric" });
@@ -129,6 +145,22 @@ const jsonLd = [
         <p class="mx-auto mt-2 max-w-md text-brand-50/90">استخدم الحاسبة الشرعية الذكية بأسعار ذهب وفضة محدّثة — مجانًا وبدون تسجيل.</p>
         <a href="/#calculator" class="btn-gold mt-6"><Icon name="calculator" class="h-5 w-5" /> احسب زكاتك الآن</a>
       </div>
+
+      {related.length > 0 && (
+        <section class="mt-12">
+          <h2 class="mb-5 text-xl font-extrabold text-slate-900 dark:text-white">مقالات ذات صلة</h2>
+          <div class="grid gap-4 sm:grid-cols-3">
+            {related.map((r) => (
+              <a href={`/blog/${r.slug}`} class="card group overflow-hidden transition hover:-translate-y-1 hover:shadow-glow">
+                <img src={r.data.image} alt={r.data.imageAlt} width="384" height="216" loading="lazy" class="aspect-[16/9] w-full object-cover" />
+                <div class="p-4">
+                  <h3 class="line-clamp-2 text-sm font-bold leading-snug text-slate-800 group-hover:text-brand-600 dark:text-white">{r.data.title}</h3>
+                </div>
+              </a>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   </article>
 
