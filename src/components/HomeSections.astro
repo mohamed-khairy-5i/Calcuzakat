@@ -1,6 +1,7 @@
 ---
 import Icon from "./Icon.astro";
 import AdSlot from "./AdSlot.astro";
+import Newsletter from "./Newsletter.astro";
 import { ZAKAT_TABS } from "@data/zakatTypes";
 import { ZAKAT_GUIDES } from "@data/zakatGuides";
 import {
@@ -257,6 +258,9 @@ const KEY_FACTS = [
   </div>
 </section>
 
+<!-- NEWSLETTER -->
+<Newsletter class="py-16 md:py-20" />
+
 <!-- CONTACT -->
 <section id="contact" class="container scroll-mt-24 py-16 md:py-24">
   <div class="card reveal mx-auto max-w-4xl overflow-hidden">
@@ -270,10 +274,10 @@ const KEY_FACTS = [
         <h3 class="mb-4 text-lg font-bold text-slate-900 dark:text-white">شارك الحاسبة</h3>
         <p class="mb-5 text-sm text-slate-500 dark:text-slate-400">ساعد غيرك على حساب زكاته بدقة — الدال على الخير كفاعله.</p>
         <div class="flex flex-wrap gap-3">
-          <a href={SOCIAL_SHARE.whatsapp} target="_blank" rel="noopener" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="whatsapp" class="h-6 w-6" /></a>
-          <a href={SOCIAL_SHARE.twitter} target="_blank" rel="noopener" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="twitter" class="h-6 w-6" /></a>
-          <a href={SOCIAL_SHARE.facebook} target="_blank" rel="noopener" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="facebook" class="h-6 w-6" /></a>
-          <a href={SOCIAL_SHARE.telegram} target="_blank" rel="noopener" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="telegram" class="h-6 w-6" /></a>
+          <a href={SOCIAL_SHARE.whatsapp} target="_blank" rel="noopener" aria-label="شارك عبر واتساب" title="شارك عبر واتساب" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="whatsapp" class="h-6 w-6" /></a>
+          <a href={SOCIAL_SHARE.twitter} target="_blank" rel="noopener" aria-label="شارك عبر إكس (تويتر)" title="شارك عبر إكس (تويتر)" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="twitter" class="h-6 w-6" /></a>
+          <a href={SOCIAL_SHARE.facebook} target="_blank" rel="noopener" aria-label="شارك عبر فيسبوك" title="شارك عبر فيسبوك" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="facebook" class="h-6 w-6" /></a>
+          <a href={SOCIAL_SHARE.telegram} target="_blank" rel="noopener" aria-label="شارك عبر تيليجرام" title="شارك عبر تيليجرام" class="grid h-12 w-12 place-items-center rounded-xl bg-brand-50 text-brand-600 transition hover:bg-brand-100 dark:bg-slate-800 dark:text-brand-300"><Icon name="telegram" class="h-6 w-6" /></a>
         </div>
       </div>
     </div>

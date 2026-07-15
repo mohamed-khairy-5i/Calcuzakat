@@ -49,12 +49,12 @@ const props = Astro.props;
   </head>
   <body>
     <a
-      href="#calculator"
+      href="#main-content"
       class="sr-only focus:not-sr-only focus:absolute focus:z-[60] focus:m-3 focus:rounded-lg focus:bg-brand-600 focus:px-4 focus:py-2 focus:text-white"
-      >تخطَّ إلى الحاسبة</a
+      >تخطَّ إلى المحتوى</a
     >
     <Header />
-    <main>
+    <main id="main-content">
       <slot />
     </main>
     <Footer />

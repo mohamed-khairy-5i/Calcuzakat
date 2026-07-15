@@ -61,14 +61,14 @@ const fmtDate = (d: Date) =>
               />
             </div>
             <div class="p-6">
-              <div class="mb-3 flex items-center gap-3 text-xs text-slate-400">
+              <div class="mb-3 flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                 <span class="inline-flex items-center gap-1"><Icon name="clock" class="h-3.5 w-3.5" /> {p.data.readingTime} دقائق</span>
                 <span>•</span>
                 <span>{fmtDate(p.data.pubDate)}</span>
               </div>
               <h2 class="mb-2 text-lg font-bold leading-snug text-slate-900 transition group-hover:text-brand-700 dark:text-white dark:group-hover:text-brand-300">{p.data.title}</h2>
               <p class="line-clamp-3 text-sm leading-relaxed text-slate-500 dark:text-slate-400">{p.data.description}</p>
-              <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-brand-600 dark:text-brand-400">اقرأ المقال <Icon name="arrowLeft" class="h-4 w-4" /></span>
+              <span class="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-brand-700 dark:text-brand-400">اقرأ المقال <Icon name="arrowLeft" class="h-4 w-4" /></span>
             </div>
           </a>
         </article>

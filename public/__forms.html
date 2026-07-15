@@ -1,0 +1,22 @@
+<!--
+  ملف اكتشاف نماذج Netlify (Netlify Forms detection).
+  يضمن أن يتعرّف Netlify على نموذج النشرة البريدية أثناء البناء
+  حتى وإن كان النموذج الأصلي مُولَّدًا عبر Astro.
+  لا يظهر هذا الملف للزوّار ولا يُفهرَس.
+-->
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Netlify Forms</title>
+  </head>
+  <body>
+    <form name="newsletter" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="newsletter" />
+      <input type="text" name="name" />
+      <input type="email" name="email" />
+      <input name="bot-field" />
+    </form>
+  </body>
+</html>
