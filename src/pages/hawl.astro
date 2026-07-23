@@ -1,0 +1,191 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+
+const jsonLd = [
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: "حاسبة الحول الهجري",
+    url: SITE.domain + "/hawl",
+    applicationCategory: "FinanceApplication",
+    operatingSystem: "Web",
+    inLanguage: "ar",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "الرئيسية", item: SITE.domain + "/" },
+      { "@type": "ListItem", position: 2, name: "حاسبة الحول", item: SITE.domain + "/hawl" },
+    ],
+  },
+];
+---
+<BaseLayout
+  title="حاسبة الحول الهجري | هل مرّ عام كامل على مالك؟ — CalcuZakat"
+  description="أداة مجانية لمعرفة موعد حولان الحول: أدخل تاريخ بلوغ مالك النصاب واعرف بالتقويم الهجري متى تجب زكاتك وكم بقي من الأيام."
+  path="/hawl"
+  keywords="حاسبة الحول, الحول الهجري, موعد الزكاة, حولان الحول, التقويم الهجري, متى تجب الزكاة"
+  jsonLd={jsonLd}
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <span class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur">
+        <Icon name="clock" class="h-4 w-4 text-gold-300" /> حاسبة الحول
+      </span>
+      <h1 class="text-4xl font-extrabold md:text-5xl">حاسبة <span class="grad-text">الحول الهجري</span></h1>
+      <p class="mx-auto mt-4 max-w-2xl text-lg text-brand-50/90">
+        اعرف بدقّة متى يكتمل الحول (عامٌ هجري كامل) على مالك وتجب فيه الزكاة.
+      </p>
+    </div>
+  </section>
+
+  <div class="container py-14 md:py-20">
+    <div class="mx-auto max-w-2xl">
+      <div class="card p-6 md:p-8">
+        <label for="hawl-date" class="mb-2 block font-bold text-slate-900 dark:text-white">
+          تاريخ بلوغ المال النصاب
+        </label>
+        <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">
+          أدخل اليوم الميلادي الذي بلغ فيه مالك النصاب لأول مرة (أو آخر يوم أخرجت فيه زكاتك).
+        </p>
+        <input
+          type="date"
+          id="hawl-date"
+          class="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-lg text-slate-900 focus:border-brand-500 focus:ring-2 focus:ring-brand-200 dark:border-slate-600 dark:bg-slate-800 dark:text-white"
+        />
+        <button id="hawl-calc" class="btn-gold mt-5 w-full justify-center">
+          <Icon name="calculator" class="h-5 w-5" /> احسب موعد الزكاة
+        </button>
+      </div>
+
+      <div id="hawl-result" class="mt-6 hidden">
+        <div class="card overflow-hidden p-0">
+          <div id="hawl-banner" class="p-6 text-center text-white">
+            <p id="hawl-status" class="text-2xl font-extrabold"></p>
+            <p id="hawl-sub" class="mt-1 text-white/90"></p>
+          </div>
+          <dl class="grid gap-px bg-slate-100 dark:bg-slate-700 sm:grid-cols-2">
+            <div class="bg-white p-5 dark:bg-slate-800">
+              <dt class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">تاريخ البداية (هجري)</dt>
+              <dd id="hawl-start-h" class="mt-1 font-bold text-slate-900 dark:text-white"></dd>
+            </div>
+            <div class="bg-white p-5 dark:bg-slate-800">
+              <dt class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">موعد وجوب الزكاة (هجري)</dt>
+              <dd id="hawl-due-h" class="mt-1 font-bold text-brand-700 dark:text-brand-300"></dd>
+            </div>
+            <div class="bg-white p-5 dark:bg-slate-800">
+              <dt class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">موعد وجوب الزكاة (ميلادي)</dt>
+              <dd id="hawl-due-g" class="mt-1 font-bold text-slate-900 dark:text-white"></dd>
+            </div>
+            <div class="bg-white p-5 dark:bg-slate-800">
+              <dt class="text-xs font-semibold uppercase text-slate-500 dark:text-slate-400">المتبقّي</dt>
+              <dd id="hawl-remaining" class="mt-1 font-bold text-slate-900 dark:text-white"></dd>
+            </div>
+          </dl>
+          <div class="border-t border-slate-100 p-5 text-center dark:border-slate-700">
+            <a href="/#calculator" class="btn-gold justify-center">احسب مقدار زكاتك الآن</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 rounded-2xl border border-slate-200 bg-slate-50 p-6 text-sm leading-relaxed text-slate-600 dark:border-slate-700 dark:bg-slate-800/50 dark:text-slate-300">
+        <h2 class="mb-2 text-base font-bold text-slate-900 dark:text-white">ما هو الحول؟</h2>
+        <p>
+          الحول هو مرور سنةٍ هجرية كاملة (نحو 354 يومًا) على ملك المال بعد بلوغه النصاب. فإذا اكتمل
+          الحول والمال باقٍ على النصاب وجبت الزكاة بمقدار 2.5%. تعرّف أكثر في مقال
+          <a href="/blog/hawl-hijri-year" class="font-semibold text-brand-700 underline dark:text-brand-300">الحول في الزكاة</a>.
+        </p>
+      </div>
+
+      <AdSlot label="مساحة إعلانية" class="mt-10" />
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  const $ = (id: string) => document.getElementById(id) as HTMLElement;
+
+  const fmtHijri = (d: Date) =>
+    new Intl.DateTimeFormat("ar-SA-u-ca-islamic-umalqura", {
+      day: "numeric", month: "long", year: "numeric",
+    }).format(d);
+  const fmtGreg = (d: Date) =>
+    new Intl.DateTimeFormat("ar-EG-u-nu-latn", {
+      day: "numeric", month: "long", year: "numeric",
+    }).format(d);
+
+  function hijriYearLater(start: Date): Date {
+    // Advance the Islamic (Umm al-Qura) year by 1, keeping same H-month/H-day.
+    const fmt = new Intl.DateTimeFormat("en-US-u-ca-islamic-umalqura", {
+      day: "numeric", month: "numeric", year: "numeric",
+    });
+    const parts = fmt.formatToParts(start);
+    const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "0";
+    const hY = parseInt(get("year"), 10);
+    const hM = parseInt(get("month"), 10);
+    const hD = parseInt(get("day"), 10);
+    const targetY = hY + 1;
+    // Search a window of Gregorian days around ~354 days later for the matching H-date.
+    const approx = new Date(start.getTime() + 355 * 86400000);
+    for (let offset = -20; offset <= 20; offset++) {
+      const cand = new Date(approx.getTime() + offset * 86400000);
+      const cp = fmt.formatToParts(cand);
+      const cg = (t: string) => cp.find((p) => p.type === t)?.value ?? "0";
+      if (
+        parseInt(cg("year"), 10) === targetY &&
+        parseInt(cg("month"), 10) === hM &&
+        parseInt(cg("day"), 10) === hD
+      ) {
+        return cand;
+      }
+    }
+    // Fallback: fixed 354-day Hijri year length.
+    return new Date(start.getTime() + 354 * 86400000);
+  }
+
+  function run() {
+    const val = (document.getElementById("hawl-date") as HTMLInputElement).value;
+    if (!val) return;
+    const start = new Date(val + "T00:00:00");
+    if (isNaN(start.getTime())) return;
+
+    const due = hijriYearLater(start);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const done = today.getTime() >= due.getTime();
+    const diffDays = Math.round((due.getTime() - today.getTime()) / 86400000);
+
+    $("hawl-start-h").textContent = fmtHijri(start);
+    $("hawl-due-h").textContent = fmtHijri(due);
+    $("hawl-due-g").textContent = fmtGreg(due);
+
+    const banner = $("hawl-banner");
+    if (done) {
+      banner.style.background = "linear-gradient(135deg,#027a48,#065f46)";
+      $("hawl-status").textContent = "اكتمل الحول ✓";
+      $("hawl-sub").textContent = "تجب عليك الزكاة الآن إن بقي مالك على النصاب.";
+      $("hawl-remaining").textContent = "مستحقّة الآن";
+    } else {
+      banner.style.background = "linear-gradient(135deg,#b45309,#92400e)";
+      $("hawl-status").textContent = "لم يكتمل الحول بعد";
+      $("hawl-sub").textContent = "لم تمرّ سنةٌ هجرية كاملة على مالك.";
+      $("hawl-remaining").textContent = `${diffDays} يومًا تقريبًا`;
+    }
+
+    $("hawl-result").classList.remove("hidden");
+    $("hawl-result").scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+    const w = window as any;
+    if (typeof w.czTrack === "function") w.czTrack("hawl_calculate", { completed: done });
+  }
+
+  document.getElementById("hawl-calc")?.addEventListener("click", run);
+  document.getElementById("hawl-date")?.addEventListener("keydown", (e) => {
+    if ((e as KeyboardEvent).key === "Enter") run();
+  });
+</script>

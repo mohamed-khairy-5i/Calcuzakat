@@ -10,7 +10,10 @@ export const GET: APIRoute = async () => {
   const staticUrls = [
     { loc: "/", priority: "1.0", changefreq: "weekly" },
     { loc: "/zakat", priority: "0.9", changefreq: "monthly" },
+    { loc: "/hawl", priority: "0.8", changefreq: "monthly" },
     { loc: "/blog", priority: "0.8", changefreq: "weekly" },
+    { loc: "/faq", priority: "0.7", changefreq: "monthly" },
+    { loc: "/glossary", priority: "0.6", changefreq: "monthly" },
     { loc: "/about", priority: "0.5", changefreq: "monthly" },
     { loc: "/privacy", priority: "0.3", changefreq: "yearly" },
   ];

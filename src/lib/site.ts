@@ -33,10 +33,10 @@ export const ANALYTICS = {
 export const NAV = [
   { href: "/#calculator", label: "الحاسبة" },
   { href: "/zakat", label: "أنواع الزكاة" },
-  { href: "/#about", label: "عن الزكاة" },
+  { href: "/hawl", label: "حاسبة الحول" },
   { href: "/blog", label: "المدونة" },
-  { href: "/#faq", label: "الأسئلة" },
-  { href: "/#contact", label: "تواصل" },
+  { href: "/faq", label: "الأسئلة" },
+  { href: "/glossary", label: "القاموس" },
 ] as const;
 
 export const SOCIAL_SHARE = {

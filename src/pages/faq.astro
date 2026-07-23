@@ -1,0 +1,68 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+import { FAQS } from "@data/content";
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  inLanguage: "ar",
+  mainEntity: FAQS.map((f) => ({
+    "@type": "Question",
+    name: f.q,
+    acceptedAnswer: { "@type": "Answer", text: f.a },
+  })),
+};
+---
+<BaseLayout
+  title="الأسئلة الشائعة عن الزكاة | إجابات موثّقة — CalcuZakat"
+  description="إجابات موثّقة على أكثر الأسئلة شيوعًا حول الزكاة: نسبة الزكاة، النصاب، زكاة الذهب والتجارة والزروع، وخصوصية الحاسبة."
+  path="/faq"
+  keywords="أسئلة الزكاة, نسبة الزكاة, نصاب الزكاة, زكاة الذهب, أحكام الزكاة, الأسئلة الشائعة"
+  jsonLd={jsonLd}
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <span class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur">
+        <Icon name="info" class="h-4 w-4 text-gold-300" /> الأسئلة الشائعة
+      </span>
+      <h1 class="text-4xl font-extrabold md:text-5xl">أسئلة شائعة عن <span class="grad-text">الزكاة</span></h1>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-brand-50/90">
+        أجوبة سريعة وموثّقة على أكثر ما يسأل عنه الناس في حساب الزكاة وأحكامها.
+      </p>
+    </div>
+  </section>
+
+  <div class="container py-14 md:py-20">
+    <div class="mx-auto max-w-3xl space-y-4">
+      {FAQS.map((f) => (
+        <details class="card group reveal p-0">
+          <summary class="flex cursor-pointer list-none items-center justify-between gap-4 p-6 font-bold text-slate-900 dark:text-white">
+            <span class="flex items-center gap-3">
+              <Icon name="star" class="h-5 w-5 shrink-0 text-gold-500" />
+              {f.q}
+            </span>
+            <Icon name="chevron" class="h-5 w-5 shrink-0 text-brand-600 transition-transform group-open:rotate-180 dark:text-brand-300" />
+          </summary>
+          <p class="border-t border-slate-100 px-6 pb-6 pt-4 leading-relaxed text-slate-600 dark:border-slate-700 dark:text-slate-300">
+            {f.a}
+          </p>
+        </details>
+      ))}
+    </div>
+
+    <div class="mx-auto mt-12 max-w-3xl rounded-2xl border border-brand-100 bg-brand-50/60 p-8 text-center dark:border-brand-800 dark:bg-brand-900/30">
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white">لم تجد إجابتك؟</h2>
+      <p class="mt-2 text-slate-600 dark:text-slate-300">استخدم الحاسبة لحساب زكاتك بدقة، أو تصفّح أدلة الزكاة التفصيلية والمدونة.</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="/#calculator" class="btn-gold">احسب زكاتك الآن</a>
+        <a href="/zakat" class="btn-outline">أدلة الزكاة</a>
+        <a href="/glossary" class="btn-outline">قاموس المصطلحات</a>
+      </div>
+    </div>
+
+    <AdSlot label="مساحة إعلانية" class="mx-auto mt-12 max-w-4xl" />
+  </div>
+</BaseLayout>

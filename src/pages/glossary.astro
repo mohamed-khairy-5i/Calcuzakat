@@ -1,0 +1,86 @@
+---
+import BaseLayout from "@layouts/BaseLayout.astro";
+import Icon from "@components/Icon.astro";
+import AdSlot from "@components/AdSlot.astro";
+import { SITE } from "@lib/site";
+
+type Term = { term: string; def: string };
+const TERMS: Term[] = [
+  { term: "الزكاة", def: "الركن الثالث من أركان الإسلام؛ حقٌّ واجب في مالٍ مخصوص بلغ النصاب وحال عليه الحول، يُصرف لأصنافٍ مخصوصة تطهيرًا للمال ونماءً له." },
+  { term: "النصاب", def: "الحدّ الأدنى من المال الذي تجب فيه الزكاة. نصاب الذهب 85 جرامًا، ونصاب الفضة 595 جرامًا، ويؤخذ الأقل قيمةً احتياطًا لمصلحة الفقراء." },
+  { term: "الحول", def: "مرور سنة هجرية كاملة (نحو 354 يومًا) على ملك المال بعد بلوغه النصاب. وهو شرطٌ في زكاة المال والذهب والفضة وعروض التجارة والأنعام." },
+  { term: "عروض التجارة", def: "كل ما أُعدّ للبيع والشراء بقصد الربح من سلعٍ وبضائع وعقارات. تُقوَّم بسعر السوق يوم وجوب الزكاة ثم يُخرَج منها 2.5%." },
+  { term: "الركاز", def: "الكنز المدفون من دفائن الجاهلية، وتجب فيه الزكاة بمقدار الخُمس (20%) فور العثور عليه دون اشتراط حولٍ أو نصاب." },
+  { term: "المعدن", def: "ما يُستخرَج من باطن الأرض كالذهب والفضة والحديد، وتجب فيه الزكاة عند بلوغه النصاب على خلافٍ في المقدار بين الفقهاء." },
+  { term: "زكاة الفطر", def: "صدقة واجبة على كل مسلم قادر تُخرَج طعامًا (نحو 2.5–3 كجم) عن كل فرد قبل صلاة عيد الفطر، طُهرةً للصائم وطعمةً للمساكين." },
+  { term: "المصارف الثمانية", def: "الأصناف التي تُصرف إليها الزكاة كما في سورة التوبة: الفقراء، المساكين، العاملون عليها، المؤلَّفة قلوبهم، في الرقاب، الغارمون، في سبيل الله، وابن السبيل." },
+  { term: "الفقير", def: "من لا يملك ما يكفيه أو يملك أقلّ من نصف كفايته. وهو أشدّ حاجةً من المسكين عند جمهور الفقهاء." },
+  { term: "المسكين", def: "من يملك بعض كفايته لكنها لا تكفيه، فحاله أخفّ من الفقير." },
+  { term: "الغارم", def: "المَدين العاجز عن سداد دينه، ويُعطى من الزكاة ما يقضي به دينه إذا لم يكن الدين في معصية." },
+  { term: "ابن السبيل", def: "المسافر المنقطع عن ماله في سفره، يُعطى من الزكاة ما يُبلّغه بلده ولو كان غنيًّا في وطنه." },
+  { term: "النماء", def: "قابلية المال للزيادة والنمو فعلًا أو تقديرًا. وهو من شروط وجوب الزكاة، فلا زكاة في أدوات الحاجة الأصلية غير النامية." },
+  { term: "الملك التام", def: "أن يكون المال في حيازة المالك وتصرفه الكامل، فلا زكاة في مالٍ لا يقدر على التصرف فيه كالدين المتعذّر أو المال المغصوب." },
+  { term: "تعجيل الزكاة", def: "إخراج الزكاة قبل تمام الحول لمصلحةٍ كتحرّي رمضان، وهو جائز بشرط بلوغ المال النصاب." },
+  { term: "الدين الحالّ", def: "الدين المستحق الأداء فورًا، ويُخصم من وعاء الزكاة عند كثير من الفقهاء قبل حساب الزكاة." },
+];
+const sorted = [...TERMS].sort((a, b) => a.term.localeCompare(b.term, "ar"));
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "DefinedTermSet",
+  name: "قاموس مصطلحات الزكاة",
+  url: SITE.domain + "/glossary",
+  inLanguage: "ar",
+  hasDefinedTerm: sorted.map((t) => ({
+    "@type": "DefinedTerm",
+    name: t.term,
+    description: t.def,
+    inDefinedTermSet: SITE.domain + "/glossary",
+  })),
+};
+---
+<BaseLayout
+  title="قاموس مصطلحات الزكاة | شرح المصطلحات الفقهية — CalcuZakat"
+  description="قاموس شامل لمصطلحات الزكاة الفقهية: النصاب، الحول، عروض التجارة، الركاز، المصارف الثمانية والنماء وغيرها بشرحٍ مبسّط وموثّق."
+  path="/glossary"
+  keywords="مصطلحات الزكاة, النصاب, الحول, عروض التجارة, الركاز, مصارف الزكاة, قاموس الزكاة"
+  jsonLd={jsonLd}
+>
+  <section class="bg-gradient-to-br from-brand-800 to-brand-900 py-16 text-white md:py-20">
+    <div class="container text-center">
+      <span class="mb-4 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-semibold backdrop-blur">
+        <Icon name="book" class="h-4 w-4 text-gold-300" /> قاموس المصطلحات
+      </span>
+      <h1 class="text-4xl font-extrabold md:text-5xl">قاموس مصطلحات <span class="grad-text">الزكاة</span></h1>
+      <p class="mx-auto mt-4 max-w-xl text-lg text-brand-50/90">
+        شرحٌ مبسّط وموثّق لأهمّ المصطلحات الفقهية التي تحتاجها لفهم أحكام الزكاة وحسابها.
+      </p>
+    </div>
+  </section>
+
+  <div class="container py-14 md:py-20">
+    <dl class="mx-auto grid max-w-4xl gap-5 md:grid-cols-2">
+      {sorted.map((t) => (
+        <div class="card card-hover reveal p-6" id={t.term}>
+          <dt class="mb-2 flex items-center gap-2 text-lg font-bold text-brand-700 dark:text-brand-300">
+            <Icon name="check" class="h-5 w-5 shrink-0 text-gold-500" />
+            {t.term}
+          </dt>
+          <dd class="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{t.def}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <div class="mx-auto mt-12 max-w-4xl rounded-2xl border border-brand-100 bg-brand-50/60 p-8 text-center dark:border-brand-800 dark:bg-brand-900/30">
+      <h2 class="text-xl font-bold text-slate-900 dark:text-white">جاهز لحساب زكاتك؟</h2>
+      <p class="mt-2 text-slate-600 dark:text-slate-300">استخدم الحاسبة الدقيقة أو تصفّح الأدلة التفصيلية لكل نوع من أنواع الزكاة.</p>
+      <div class="mt-6 flex flex-wrap justify-center gap-3">
+        <a href="/#calculator" class="btn-gold">احسب زكاتك</a>
+        <a href="/zakat" class="btn-outline">أدلة الزكاة</a>
+        <a href="/faq" class="btn-outline">الأسئلة الشائعة</a>
+      </div>
+    </div>
+
+    <AdSlot label="مساحة إعلانية" class="mx-auto mt-12 max-w-4xl" />
+  </div>
+</BaseLayout>
