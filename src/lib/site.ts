@@ -9,7 +9,7 @@ export const SITE = {
   tagline: "احسب زكاتك بدقة شرعية في دقائق",
   description:
     "حاسبة الزكاة الشرعية الأدق والأشمل مجاناً. احسب زكاة المال، الذهب، الفضة، الأسهم، العقارات، عروض التجارة، الأنعام، الزروع وزكاة الفطر بأسعار محدّثة ونصاب دقيق.",
-  email: "info@calcuzakat.com",
+  email: "mohamedkhairy0887@gmail.com",
   locale: "ar_AR",
   lang: "ar",
   themeColor: "#027a48",
