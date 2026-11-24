@@ -213,15 +213,27 @@ export async function fetchLivePrices(): Promise<Prices> {
   }
 
   // Secondary provider only if the primary gold price failed validation.
+  // Swissquote public quote feed (key-less): an array of instruments, each
+  // with spreadProfilePrices[].bid/ask per troy ounce in USD.
   if (!out.live) {
-    const alt = await fetchJSON("https://api.metals.live/v1/spot/gold");
-    // metals.live returns an array like [{ price: <per ounce> }]
-    const price = Array.isArray(alt) ? alt[0]?.price : alt?.price;
-    const altGold =
-      typeof price === "number" ? price / OZ_TO_G : null;
+    const [altG, altS] = await Promise.all([
+      fetchJSON("https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAU/USD"),
+      fetchJSON("https://forex-data-feed.swissquote.com/public-quotes/bboquotes/instrument/XAG/USD"),
+    ]);
+    const mid = (q: any): number | null => {
+      const p = Array.isArray(q) ? q[0]?.spreadProfilePrices?.[0] : null;
+      return typeof p?.bid === "number" && typeof p?.ask === "number"
+        ? (p.bid + p.ask) / 2 / OZ_TO_G
+        : null;
+    };
+    const altGold = mid(altG);
+    const altSilver = mid(altS);
     if (inRange(altGold, GOLD_MIN, GOLD_MAX)) {
       out.goldUSD = altGold;
       out.live = true;
+    }
+    if (inRange(altSilver, SILVER_MIN, SILVER_MAX)) {
+      out.silverUSD = altSilver;
     }
   }
 
