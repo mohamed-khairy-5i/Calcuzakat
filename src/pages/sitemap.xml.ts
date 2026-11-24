@@ -37,7 +37,7 @@ export const GET: APIRoute = async () => {
 ${all
   .map(
     (u) => `  <url>
-    <loc>${SITE.domain}${u.loc}</loc>
+    <loc>${SITE.domain}${u.loc === "/" || u.loc.endsWith("/") ? u.loc : `${u.loc}/`}</loc>
     <lastmod>${(u as { lastmod?: string }).lastmod ?? today}</lastmod>
     <changefreq>${u.changefreq}</changefreq>
     <priority>${u.priority}</priority>
