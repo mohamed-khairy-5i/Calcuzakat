@@ -8,6 +8,9 @@ import {
   fetchLivePrices,
   fmt,
   toLocal,
+  toUSD,
+  GOLD_NISAB_G,
+  SILVER_NISAB_G,
   sym,
   goldNisabUSD,
   silverNisabUSD,
@@ -30,7 +33,27 @@ declare global {
 
 const STORAGE_KEY = "cz-data";
 const THEME = { currency: "SAR" };
-let prices: Prices = { ...DEFAULT_PRICES };
+let prices: Prices = { ...DEFAULT_PRICES, live: false, silverLive: false };
+
+/** A feed price is trusted only when both gold and silver came from a live feed. */
+function feedTrusted(): boolean {
+  return prices.live && prices.silverLive === true;
+}
+
+/**
+ * Prices the nisab may be based on: the live feed, or prices the visitor typed
+ * for today. Never the built-in default. null = no trustworthy price yet.
+ */
+function usablePrices(): Prices | null {
+  if (feedTrusted()) return prices;
+  const g = num("cz-manual-gold");
+  const s = num("cz-manual-silver");
+  if (g > 0 && s > 0) {
+    return { goldUSD: toUSD(g, THEME.currency), silverUSD: toUSD(s, THEME.currency), live: false };
+  }
+  return null;
+}
+const NEED_PRICE = "أدخل سعر اليوم لتحديد الوجوب";
 
 const $ = <T extends HTMLElement = HTMLElement>(id: string) =>
   document.getElementById(id) as T | null;
@@ -47,30 +70,37 @@ function setResult(type: string, usd: number): void {
   if (disp) disp.textContent = `${fmt(toLocal(usd, THEME.currency))} ${sym(THEME.currency)}`;
 }
 
+function setNeedPrice(type: string): void {
+  const hidden = $<HTMLInputElement>(`res-${type}`);
+  if (hidden) hidden.dataset.usd = "0";
+  const disp = $(`res-${type}-disp`);
+  if (disp) disp.textContent = NEED_PRICE;
+}
+
 function recalc(): void {
   const cur = THEME.currency;
+  const up = usablePrices();
+  const money = (type: string, total: number) =>
+    up ? setResult(type, zakatMoney(total, cur, up)) : setNeedPrice(type);
 
-  setResult(
-    "money",
-    zakatMoney(num("cz-cash") + num("cz-savings") + num("cz-receivables") - num("cz-debts"), cur, prices)
-  );
-  setResult(
-    "gold",
-    zakatGold(num("cz-gold-weight"), num("cz-gold-purity") || 24, num("cz-gold-price"), cur)
-  );
-  setResult(
-    "silver",
-    zakatSilver(num("cz-silver-weight"), num("cz-silver-purity") || 92.5, num("cz-silver-price"), cur)
-  );
-  setResult("stocks", zakatMoney(num("cz-stocks-value") + num("cz-dividends"), cur, prices));
-  setResult("property", zakatMoney(num("cz-prop-value") + num("cz-prop-rent"), cur, prices));
-  setResult(
+  money("money", num("cz-cash") + num("cz-savings") + num("cz-receivables") - num("cz-debts"));
+  if (num("cz-gold-price") > 0 || num("cz-gold-weight") * ((num("cz-gold-purity") || 24) / 24) < GOLD_NISAB_G) {
+    setResult(
+      "gold",
+      zakatGold(num("cz-gold-weight"), num("cz-gold-purity") || 24, num("cz-gold-price"), cur)
+    );
+  } else setNeedPrice("gold");
+  if (num("cz-silver-price") > 0 || num("cz-silver-weight") * ((num("cz-silver-purity") || 92.5) / 100) < SILVER_NISAB_G) {
+    setResult(
+      "silver",
+      zakatSilver(num("cz-silver-weight"), num("cz-silver-purity") || 92.5, num("cz-silver-price"), cur)
+    );
+  } else setNeedPrice("silver");
+  money("stocks", num("cz-stocks-value") + num("cz-dividends"));
+  money("property", num("cz-prop-value") + num("cz-prop-rent"));
+  money(
     "business",
-    zakatMoney(
-      num("cz-biz-inventory") + num("cz-biz-cash") + num("cz-biz-receivables") - num("cz-biz-payables"),
-      cur,
-      prices
-    )
+    num("cz-biz-inventory") + num("cz-biz-cash") + num("cz-biz-receivables") - num("cz-biz-payables")
   );
   const crop = zakatCrops(
     num("cz-crop-kg"),
@@ -113,35 +143,65 @@ function recalc(): void {
 
 function updateNisabCards(): void {
   const cur = THEME.currency;
-  const set = (id: string, usd: number) => {
+  const text = (id: string, t: string) => {
     const el = $(id);
-    if (el) el.textContent = `${fmt(toLocal(usd, cur))} ${sym(cur)}`;
+    if (el) el.textContent = t;
   };
-  set("nisab-gold-val", goldNisabUSD(prices));
-  set("nisab-silver-val", silverNisabUSD(prices));
-  set("nisab-goldprice-val", prices.goldUSD);
-  set("nisab-silverprice-val", prices.silverUSD);
+  const set = (id: string, usd: number) => text(id, `${fmt(toLocal(usd, cur))} ${sym(cur)}`);
+  const up = usablePrices();
+  const trusted = feedTrusted();
+  if (up) {
+    set("nisab-gold-val", goldNisabUSD(up));
+    set("nisab-silver-val", silverNisabUSD(up));
+    set("nisab-goldprice-val", up.goldUSD);
+    set("nisab-silverprice-val", up.silverUSD);
+  } else {
+    // No trustworthy price: show the nisab in grams only, never a built-in number.
+    text("nisab-gold-val", `${GOLD_NISAB_G} جرام ذهب`);
+    text("nisab-silver-val", `${SILVER_NISAB_G} جرام فضة`);
+    text("nisab-goldprice-val", "—");
+    text("nisab-silverprice-val", "—");
+  }
 
   const badge = $("price-status");
+  const fresh = trusted;
   if (badge) {
-    badge.textContent = prices.live ? "أسعار حيّة محدّثة" : "أسعار تقديرية";
-    badge.className = prices.live
+    badge.textContent = fresh
+      ? "أسعار حيّة محدّثة"
+      : up
+        ? "أسعار أدخلتها أنت"
+        : "السعر الحي غير متاح، أدخل سعر اليوم";
+    badge.className = fresh
       ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
       : "inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
   }
   const upd = $("last-update");
-  if (upd)
-    upd.textContent = new Date().toLocaleDateString("ar-EG-u-nu-latn", {
-      year: "numeric",
-      month: "long",
-      day: "numeric",
-    });
+  if (upd) {
+    upd.textContent =
+      trusted && prices.asOf
+        ? new Date(prices.asOf).toLocaleString("ar-EG-u-nu-latn", {
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "غير متاح";
+  }
+  const manual = $("manual-price");
+  if (manual) {
+    manual.classList.toggle("hidden", trusted);
+    const hint = $("manual-price-cur");
+    if (hint) hint.textContent = sym(cur);
+  }
 }
 
 function setDefaultPrices(): void {
   const cur = THEME.currency;
   const gp = $<HTMLInputElement>("cz-gold-price");
   const sp = $<HTMLInputElement>("cz-silver-price");
+  // Only a trusted feed price pre-fills; the built-in default never does.
+  if (!feedTrusted()) return;
   if (gp && !gp.dataset.touched) gp.value = toLocal(prices.goldUSD, cur).toFixed(2);
   if (sp && !sp.dataset.touched) sp.value = toLocal(prices.silverUSD, cur).toFixed(2);
 }
@@ -288,6 +348,18 @@ export function init(): void {
       });
     });
 
+  ["cz-manual-gold", "cz-manual-silver"].forEach((id) =>
+    $<HTMLInputElement>(id)?.addEventListener("input", () => {
+      const g = $<HTMLInputElement>("cz-gold-price");
+      const sv = $<HTMLInputElement>("cz-silver-price");
+      if (!feedTrusted()) {
+        if (g && !g.dataset.touched && id === "cz-manual-gold") g.value = $<HTMLInputElement>(id)!.value;
+        if (sv && !sv.dataset.touched && id === "cz-manual-silver") sv.value = $<HTMLInputElement>(id)!.value;
+      }
+      updateNisabCards();
+      recalc();
+    })
+  );
   $("cz-print")?.addEventListener("click", printReport);
   $("cz-share")?.addEventListener("click", shareResult);
   $("cz-reset")?.addEventListener("click", reset);
