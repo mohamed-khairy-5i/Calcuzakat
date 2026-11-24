@@ -33,6 +33,10 @@ export interface Prices {
   goldUSD: number; // per gram 24k
   silverUSD: number; // per gram
   live: boolean;
+  /** true only when the silver price also came from a feed (not the default). */
+  silverLive?: boolean;
+  /** time of the feed quote in ms since epoch (feed updatedAt, else fetch time). */
+  asOf?: number;
 }
 
 export const DEFAULT_PRICES: Prices = {
@@ -178,6 +182,12 @@ async function fetchJSON(url: string, ms = 5000): Promise<any | null> {
   }
 }
 
+/** Quote time from a provider response (updatedAt), else the fetch time. */
+function quoteTime(json: any): number {
+  const t = typeof json?.updatedAt === "string" ? Date.parse(json.updatedAt) : NaN;
+  return Number.isFinite(t) && t <= Date.now() + 60000 ? t : Date.now();
+}
+
 /** Extract a per-gram USD price from either provider's JSON shape. */
 function toPerGram(json: any): number | null {
   if (!json) return null;
@@ -207,9 +217,11 @@ export async function fetchLivePrices(): Promise<Prices> {
   if (inRange(gold, GOLD_MIN, GOLD_MAX)) {
     out.goldUSD = gold;
     out.live = true;
+    out.asOf = quoteTime(g);
   }
   if (inRange(silver, SILVER_MIN, SILVER_MAX)) {
     out.silverUSD = silver;
+    out.silverLive = true;
   }
 
   // Secondary provider only if the primary gold price failed validation.
@@ -231,9 +243,11 @@ export async function fetchLivePrices(): Promise<Prices> {
     if (inRange(altGold, GOLD_MIN, GOLD_MAX)) {
       out.goldUSD = altGold;
       out.live = true;
+      out.asOf = Date.now();
     }
     if (inRange(altSilver, SILVER_MIN, SILVER_MAX)) {
       out.silverUSD = altSilver;
+      out.silverLive = true;
     }
   }
 
