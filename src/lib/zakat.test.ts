@@ -6,6 +6,9 @@ import {
   SILVER_NISAB_G,
   cashNisabUSD,
   fetchLivePrices,
+  CURRENCIES,
+  fetchRates,
+  PEGGED,
   goldNisabUSD,
   silverNisabUSD,
   zakatCrops,
@@ -161,5 +164,38 @@ describe("doctrine constants", () => {
     expect(RATE).toBe(0.025);
     expect(GOLD_NISAB_G).toBe(85);
     expect(SILVER_NISAB_G).toBe(595);
+  });
+});
+
+describe("fetchRates", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("returns null when the feed fails", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
+    expect(await fetchRates()).toBeNull();
+  });
+  it("returns null when any currency is missing or absurd", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ result: "success", rates: { SAR: 3.75, EGP: 5000 } }) }));
+    expect(await fetchRates()).toBeNull();
+  });
+  it("accepts a complete sane response", async () => {
+    const rates: Record<string, number> = {};
+    for (const [c, v] of Object.entries(CURRENCIES)) rates[c] = v.rate * 1.05;
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ result: "success", rates, time_last_update_unix: 1790000000 }) }));
+    const r = await fetchRates();
+    expect(r?.asOf).toBe(1790000000000);
+    expect(r?.rates.EGP).toBeCloseTo(49 * 1.05);
+  });
+  it("EGP, KWD, MAD are not treated as pegged", () => {
+    expect(PEGGED.has("EGP") || PEGGED.has("KWD") || PEGGED.has("MAD")).toBe(false);
+  });
+});
+
+describe("quote time kind", () => {
+  afterEach(() => vi.unstubAllGlobals());
+  it("is quote when the feed gives updatedAt, fetch otherwise", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ price: 8000, updatedAt: "2026-01-01T10:00:00Z" }) }));
+    expect((await fetchLivePrices()).asOfKind).toBe("quote");
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: true, json: async () => ({ price: 8000 }) }));
+    expect((await fetchLivePrices()).asOfKind).toBe("fetch");
   });
 });
