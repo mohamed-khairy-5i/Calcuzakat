@@ -153,8 +153,15 @@ function recalc(): void {
     if (el) sumUsd += parseFloat(el.dataset.usd || "0") || 0;
   });
   const gt = $("grand-total");
-  if (gt)
-    gt.textContent = `${fmt(toLocal(sumUsd, cur))} ${sym(cur)}${incomplete ? " (جزئي، غير مكتمل)" : ""}`;
+  if (gt) {
+    gt.textContent = `${fmt(toLocal(sumUsd, cur))} ${sym(cur)}`;
+    if (incomplete) {
+      const tag = document.createElement("span");
+      tag.className = "mt-1 block text-base font-bold text-amber-200";
+      tag.textContent = " (جزئي، غير مكتمل)";
+      gt.appendChild(tag);
+    }
+  }
   let warn = $("total-warning");
   if (!warn && gt) {
     warn = document.createElement("div");
