@@ -67,10 +67,11 @@ import { SITE } from "@lib/site";
     </div>
     <div class="flex flex-wrap items-center justify-center gap-3 border-t border-slate-100 bg-slate-50 px-6 py-3 text-sm dark:border-slate-800 dark:bg-slate-900/60">
       <span id="price-status" class="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">جارٍ التحديث…</span>
-      <span class="text-slate-500 dark:text-slate-400">وقت السعر: <span id="last-update" class="font-semibold">جارٍ التحديث…</span></span>
+      <span class="text-slate-500 dark:text-slate-400"><span id="last-update-label">وقت السعر: </span><span id="last-update" class="font-semibold">جارٍ التحديث…</span></span>
+      <span id="fx-status" class="text-slate-500 dark:text-slate-400"></span>
     </div>
     <div id="manual-price" class="hidden border-t border-amber-200 bg-amber-50 px-6 py-4 text-sm dark:border-amber-900/50 dark:bg-amber-950/30">
-      <p class="mb-3 font-bold text-amber-800 dark:text-amber-300">تعذّر الحصول على سعر موثوق للذهب والفضة الآن. أدخل سعر جرام اليوم بـ<span id="manual-price-cur">ر.س</span> ليُحسب النصاب. إلى أن تدخله لن تحكم الحاسبة بوجوب الزكاة أو عدمه في المال.</p>
+      <p class="mb-3 font-bold text-amber-800 dark:text-amber-300">تعذّر الحصول على سعر موثوق للذهب والفضة أو سعر الصرف للعملة المختارة الآن. أدخل سعر جرام اليوم بـ<span id="manual-price-cur">ر.س</span> ليُحسب النصاب. إلى أن تدخله لن تحكم الحاسبة بوجوب الزكاة أو عدمه في المال.</p>
       <div class="grid gap-3 sm:grid-cols-2">
         <label class="block"><span class="mb-1 block text-slate-700 dark:text-slate-200">سعر جرام الذهب (عيار 24) اليوم</span><input id="cz-manual-gold" type="number" min="0" step="any" inputmode="decimal" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900" /></label>
         <label class="block"><span class="mb-1 block text-slate-700 dark:text-slate-200">سعر جرام الفضة اليوم</span><input id="cz-manual-silver" type="number" min="0" step="any" inputmode="decimal" class="w-full rounded-xl border border-slate-300 bg-white px-3 py-2 dark:border-slate-700 dark:bg-slate-900" /></label>
