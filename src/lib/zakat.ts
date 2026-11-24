@@ -37,6 +37,8 @@ export interface Prices {
   silverLive?: boolean;
   /** time of the feed quote in ms since epoch (feed updatedAt, else fetch time). */
   asOf?: number;
+  /** quote = the feed gave its own quote time; fetch = only our retrieval time is known. */
+  asOfKind?: "quote" | "fetch";
 }
 
 export const DEFAULT_PRICES: Prices = {
@@ -183,9 +185,32 @@ async function fetchJSON(url: string, ms = 5000): Promise<any | null> {
 }
 
 /** Quote time from a provider response (updatedAt), else the fetch time. */
-function quoteTime(json: any): number {
+function quoteTime(json: any): { asOf: number; kind: "quote" | "fetch" } {
   const t = typeof json?.updatedAt === "string" ? Date.parse(json.updatedAt) : NaN;
-  return Number.isFinite(t) && t <= Date.now() + 60000 ? t : Date.now();
+  return Number.isFinite(t) && t <= Date.now() + 60000
+    ? { asOf: t, kind: "quote" }
+    : { asOf: Date.now(), kind: "fetch" };
+}
+
+/** Currencies whose peg to the USD is a standing official arrangement. Kept in
+ *  code so they stay usable when the rate feed is down. Others (EGP, KWD, MAD)
+ *  are not treated as fixed. */
+export const PEGGED = new Set(["USD", "SAR", "AED", "QAR", "BHD", "OMR", "JOD"]);
+
+/** Daily USD rates from open.er-api.com. null when unavailable or invalid. */
+export async function fetchRates(): Promise<{ rates: Record<string, number>; asOf: number } | null> {
+  const j = await fetchJSON("https://open.er-api.com/v6/latest/USD");
+  if (!j || j.result !== "success" || !j.rates) return null;
+  const rates: Record<string, number> = {};
+  for (const code of Object.keys(CURRENCIES)) {
+    const r = j.rates[code];
+    const base = CURRENCIES[code].rate;
+    // reject absurd values: within a factor of 2 of the built-in reference
+    if (typeof r === "number" && Number.isFinite(r) && r > base / 2 && r < base * 2) rates[code] = r;
+  }
+  if (Object.keys(rates).length < Object.keys(CURRENCIES).length) return null;
+  const t = typeof j.time_last_update_unix === "number" ? j.time_last_update_unix * 1000 : Date.now();
+  return { rates, asOf: t };
 }
 
 /** Extract a per-gram USD price from either provider's JSON shape. */
@@ -217,7 +242,9 @@ export async function fetchLivePrices(): Promise<Prices> {
   if (inRange(gold, GOLD_MIN, GOLD_MAX)) {
     out.goldUSD = gold;
     out.live = true;
-    out.asOf = quoteTime(g);
+    const q = quoteTime(g);
+    out.asOf = q.asOf;
+    out.asOfKind = q.kind;
   }
   if (inRange(silver, SILVER_MIN, SILVER_MAX)) {
     out.silverUSD = silver;
@@ -244,6 +271,7 @@ export async function fetchLivePrices(): Promise<Prices> {
       out.goldUSD = altGold;
       out.live = true;
       out.asOf = Date.now();
+      out.asOfKind = "fetch";
     }
     if (inRange(altSilver, SILVER_MIN, SILVER_MAX)) {
       out.silverUSD = altSilver;
