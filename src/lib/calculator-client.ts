@@ -6,6 +6,8 @@ import {
   CURRENCIES,
   DEFAULT_PRICES,
   fetchLivePrices,
+  fetchRates,
+  PEGGED,
   fmt,
   toLocal,
   toUSD,
@@ -35,9 +37,18 @@ const STORAGE_KEY = "cz-data";
 const THEME = { currency: "SAR" };
 let prices: Prices = { ...DEFAULT_PRICES, live: false, silverLive: false };
 
-/** A feed price is trusted only when both gold and silver came from a live feed. */
+let fxLive = false;
+let fxAsOf: number | undefined;
+
+/** Exchange rate for the chosen currency is real: live daily rate, or an official peg. */
+function fxTrusted(cur: string = THEME.currency): boolean {
+  return fxLive || PEGGED.has(cur);
+}
+
+/** A feed price is trusted only when gold and silver both came from a live feed AND the
+ *  conversion to the chosen currency is real. */
 function feedTrusted(): boolean {
-  return prices.live && prices.silverLive === true;
+  return prices.live && prices.silverLive === true && fxTrusted();
 }
 
 /**
@@ -70,7 +81,10 @@ function setResult(type: string, usd: number): void {
   if (disp) disp.textContent = `${fmt(toLocal(usd, THEME.currency))} ${sym(THEME.currency)}`;
 }
 
+let incomplete = false;
+
 function setNeedPrice(type: string): void {
+  incomplete = true;
   const hidden = $<HTMLInputElement>(`res-${type}`);
   if (hidden) hidden.dataset.usd = "0";
   const disp = $(`res-${type}-disp`);
@@ -79,6 +93,7 @@ function setNeedPrice(type: string): void {
 
 function recalc(): void {
   const cur = THEME.currency;
+  incomplete = false;
   const up = usablePrices();
   const money = (type: string, total: number) =>
     up ? setResult(type, zakatMoney(total, cur, up)) : setNeedPrice(type);
@@ -116,7 +131,9 @@ function recalc(): void {
   const fitrDisp = $(`res-fitr-disp`);
   if (fitrDisp) {
     const persons = Math.max(0, Math.round(num("cz-fitr-persons")));
-    fitrDisp.textContent = `${fmt(toLocal(fitrUsd, cur))} ${sym(cur)}${persons ? ` (عن ${persons} فرد)` : ""}`;
+    fitrDisp.textContent = fxTrusted()
+      ? `${fmt(toLocal(fitrUsd, cur))} ${sym(cur)}${persons ? ` (عن ${persons} فرد)` : ""}`
+      : `${persons ? persons * 8 : 8} دولارًا${persons ? ` (عن ${persons} فرد)` : " للفرد"}، سعر الصرف لهذه العملة غير متاح`;
   }
 
   // Livestock — in-kind text
@@ -136,7 +153,23 @@ function recalc(): void {
     if (el) sumUsd += parseFloat(el.dataset.usd || "0") || 0;
   });
   const gt = $("grand-total");
-  if (gt) gt.textContent = `${fmt(toLocal(sumUsd, cur))} ${sym(cur)}`;
+  if (gt)
+    gt.textContent = `${fmt(toLocal(sumUsd, cur))} ${sym(cur)}${incomplete ? " (جزئي، غير مكتمل)" : ""}`;
+  let warn = $("total-warning");
+  if (!warn && gt) {
+    warn = document.createElement("div");
+    warn.id = "total-warning";
+    warn.setAttribute("role", "alert");
+    warn.className =
+      "mt-2 rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm font-bold text-red-800";
+    gt.insertAdjacentElement("afterend", warn);
+  }
+  if (warn) {
+    warn.textContent = incomplete
+      ? "هذا الإجمالي غير مكتمل: بنود لم تُحسب لأن سعر الذهب والفضة اليوم غير متوفر. أدخل سعر اليوم أعلى الصفحة ليكتمل الحساب."
+      : "";
+    warn.classList.toggle("hidden", !incomplete);
+  }
 
   save();
 }
@@ -170,10 +203,26 @@ function updateNisabCards(): void {
       ? "أسعار حيّة محدّثة"
       : up
         ? "أسعار أدخلتها أنت"
-        : "السعر الحي غير متاح، أدخل سعر اليوم";
+        : prices.live && prices.silverLive && !fxTrusted()
+          ? "سعر الصرف لهذه العملة غير متاح، أدخل أسعار اليوم بالعملة المحلية"
+          : "السعر الحي غير متاح، أدخل سعر اليوم";
     badge.className = fresh
       ? "inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300"
       : "inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700 dark:bg-amber-900/40 dark:text-amber-300";
+  }
+  const lbl = $("last-update-label");
+  if (lbl)
+    lbl.textContent =
+      trusted && prices.asOfKind === "fetch"
+        ? "وقت جلب السعر (المصدر لم يذكر وقت الاقتباس): "
+        : "وقت اقتباس السعر: ";
+  const fx = $("fx-status");
+  if (fx) {
+    fx.textContent = fxLive
+      ? `سعر الصرف: يومي من open.er-api، تحديث ${fxAsOf ? new Date(fxAsOf).toLocaleDateString("ar-EG-u-nu-latn", { day: "numeric", month: "long", year: "numeric" }) : ""}`
+      : PEGGED.has(cur)
+        ? "سعر الصرف: ربط رسمي ثابت (المصدر الحي غير متاح)"
+        : "سعر الصرف: غير متاح لهذه العملة الآن";
   }
   const upd = $("last-update");
   if (upd) {
@@ -380,6 +429,19 @@ export function init(): void {
       );
     }
   } catch {}
+
+  // Live exchange rates (async, non-blocking)
+  fetchRates().then((r) => {
+    if (!r) return;
+    Object.keys(r.rates).forEach((c) => {
+      CURRENCIES[c].rate = r.rates[c];
+    });
+    fxLive = true;
+    fxAsOf = r.asOf;
+    setDefaultPrices();
+    updateNisabCards();
+    recalc();
+  });
 
   // Live prices (async, non-blocking)
   fetchLivePrices().then((p) => {
