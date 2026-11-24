@@ -108,7 +108,22 @@ describe("fetchLivePrices", () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("offline")));
     const p = await fetchLivePrices();
     expect(p.live).toBe(false);
+    expect(p.silverLive).toBeUndefined();
+    expect(p.asOf).toBeUndefined();
     expect(p.goldUSD).toBe(DEFAULT_PRICES.goldUSD);
+  });
+
+  it("records the quote time and silverLive from a valid feed", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockResolvedValue({
+        ok: true,
+        json: async () => ({ price: 8000, updatedAt: "2026-01-01T10:00:00Z" }),
+      })
+    );
+    const p = await fetchLivePrices();
+    expect(p.live).toBe(true);
+    expect(p.asOf).toBe(Date.parse("2026-01-01T10:00:00Z"));
   });
 
   it("uses a valid live price and flags live:true", async () => {
