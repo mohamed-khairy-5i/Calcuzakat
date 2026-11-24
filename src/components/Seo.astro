@@ -22,7 +22,9 @@ const {
   noindex = false,
 } = Astro.props;
 
-const canonical = new URL(path, SITE.domain).href;
+// Netlify serves directory pages with a trailing slash; keep canonical identical to the served URL
+const normPath = path === "/" || path.endsWith("/") || /\.[a-z0-9]+$/i.test(path) ? path : `${path}/`;
+const canonical = new URL(normPath, SITE.domain).href;
 const ogImageUrl = new URL(image, SITE.domain).href;
 const graph = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
 ---
